@@ -1,0 +1,74 @@
+
+<div id='app1' v-cloak>
+
+    <v-app>
+        <v-main>
+            <span class="h1">การสมัครลงทะเบียนขอเปิดร้าน</span>
+			<v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search"
+                    single-line
+                    hide-details
+                ></v-text-field>
+             <v-data-table
+			 :search = 'search'
+             :headers ='headers'
+             :items   ='sellers'
+             :footer-props="{ 'items-per-page-options': [25, 50,100] }"
+             :items-per-page="25"
+              class='elevation-1'
+             />
+                  <template v-slot:item.actions='{item}'>
+                        <v-btn small class="white--text mr-1"color="success"
+                        @@click="approveSeller(item)"
+                        >
+                            <v-icon>mdi-account-search</v-icon>
+                        </v-btn>
+                  </template>
+             </v-data-table>
+        </v-main>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                   search :'',
+                   sellers:[]
+                   ,
+                   headers:[
+                      {text:'รหัสประจำตัวผู้ขาย',value:'sellerId',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'ชื่อผู้ขาย',value:'user',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เลข 13 หลัก บัตรประชาชน',value:'sellerIdCard',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เวลาในการสมัครเปิดร้าน',value:'sellerRegistrationDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'ตรวจดู',value:'actions',align:'left',sortable:true,class: 'white--text blue darken-2'}
+
+					]
+                }//edata
+                ,
+                created(){
+                  this.sellers = @Html.Raw(Json.Serialize(@ViewBag.sellers));
+                }//ecreated
+                ,
+                methods:{
+                    approveSeller(item){
+                        window.location = '/Admin/approveSeller2/'+item.sellerId;
+                    }                   
+                }//emethods
+                ,
+                computed:{
+
+                }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

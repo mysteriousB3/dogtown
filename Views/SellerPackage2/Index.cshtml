@@ -1,0 +1,319 @@
+<div id="app1">
+    <v-app>
+        <v-main>
+            <v-card style="padding: 20px;" align="center" color="blue-grey lighten-4">
+                <img :src="seller.sellerProfilePic" style="width: 100px; border-radius:150px" alt=""><br>
+                <v-card-text>
+                    <span class="h1"> {{seller.farmName}}</span><br><br>
+                    <div class="h3" align="left">
+                        <span>ขณะนี้แพ็คเกจของคุณคือ : {{sellerPackage.packageDetail.packageDetailName}}</span><br>
+                        <span>จำนวณโพสต์ที่เหลือ : {{sellerPackage.totalPostAvailable}}</span><br>
+                        <span v-if="sellerPackage.packageDetailId != 1">แพ็คเกจถูกซื้อเมื่อวันที่ : {{sellerPackage.packageBuyingDateTime}}</span><br>
+                        <span v-if="sellerPackage.packageDetailId != 1">แพ็คเกจถูกอนุมัตและเริ่มนับการใช้เมื่อวันที่ : {{sellerPackage.packageStartingDateTime}}</span><br>
+                        <span v-if="sellerPackage.packageDetailId != 1">แพ็คเกจจะหมดอายุวันที่ : {{sellerPackage.packageEndingDateTime}}</span><br>
+                    </div>
+                </v-card-text>
+                <v-card style="padding: 20px;" align="center" color="blue-grey lighten-5">
+                    <v-card-text>
+                        <span class="h1"> ซื้อแพ็คเกจ</span><br><br>
+                        <span class="h4">การซื้อแพ็คเกจใหม่จะทำให้ระยะเวลาในการหมดอายุเพิ่มขึ้น</span><br>
+                        <span class="h4">หากแพ็คเกจของท่านหมดอายุ โพสต์ประกาศทุกโพสต์จะถูกลบออก</span>
+                        <div class="h3" align="left">
+                            <v-card style="padding:20px;">
+                                <v-row>
+                                    <v-col cols="10">
+                                        1. "เริ่มต้น" แพ็คเกจนี้ จะมี โพสต์ให้ทั้งหมด 5 โพสต์ แต่ละโพสต์จะมีอายุ 5 วัน จากนั้นโพสต์จะหายไป แล้วคุณต้องลงโพสต์ใหม่
+                                        ระยะเวลาของแพ็คเกจนี้ไม่มีจำกัด คุณจะได้รับแพ็คแกจนี้เมื่อคุณลงทะเบียนเปิดร้าน
+                                    </v-col>
+                                    <v-col cols="2" align="center" style="margin-top:30px;">
+                                        <button class="btn btn-lg btn-success" disabled>ซื้อ</button>
+                                    </v-col>
+                                </v-row>
+                            </v-card>
+                            <br>
+                            <v-card style="padding:20px;">
+                                <v-row>
+                                    <v-col cols="10">
+                                        2. "ไดมอนด์" แพ็คเกจนี้ จะมี โพสต์ให้ทั้งหมด 10 โพสต์ แต่ละโพสต์จะมีอายุ 14 วัน จากนั้นโพสต์จะหายไป แล้วคุณต้องลงโพสต์ใหม่
+                                        ระยะเวลาของแพ็คเกจ 30 วัน ราคา 59 บาท
+                                    </v-col>
+                                    <v-col cols="2" align="center" style="margin-top:30px;">
+                                        <button id="diamond" @@click="buyDiamond()" class="btn btn-lg btn-success">ซื้อ</button>
+                                    </v-col>
+                                </v-row>
+                            </v-card>
+                            <br>
+                            <v-card style="padding:20px;">
+                                <v-row>
+                                    <v-col cols="10">
+                                        3. "แชมป์เปี้ยน" แพ็คเกจนี้ จะมี โพสต์ให้ทั้งหมด 30 โพสต์ แต่ละโพสต์จะมีอายุ 30 วัน จากนั้นโพสต์จะหายไป แล้วคุณต้องลงโพสต์ใหม่
+                                        ระยะเวลาของแพ็คเกจ 90 วัน ราคา 199 บาท
+                                    </v-col>
+                                    <v-col cols="2" align="center" style="margin-top:30px;">
+                                        <button id="champion" @@click="buyChampion" class="btn btn-lg btn-success">ซื้อ</button>
+                                    </v-col>
+                                </v-row>
+                            </v-card>
+                        </div>
+                    </v-card-text>
+                </v-card>
+            </v-card>
+
+            @* overlay part *@
+            <v-overlay :z-index="zIndex" :value="overlay1">
+                <v-responsive class="overflow-y-auto" height="500px" width="900px" style="float:left;">
+                    <v-card>
+                        <v-card-text>
+                            <div align="center">
+                                <span class="h3">โปรดอัพรูปภาพหลักฐานการชำระเงินมาที่บัญชี xxxxx</span><br>
+                                <span class="h3">ชื่อบัญชี xxxx ยอดที่ต้องชำระ {{bill}} บาท</span>
+                            </div>
+                            <v-col cols="3">
+                                <v-card>
+                                    <v-card-text>
+                                    <v-img :src="paymentEvidenceData"   ></v-img>
+                                    </v-card-text>
+                                    <v-card-actions>
+                                    <v-file-input label="หลักฐานในการชำระเงิน" v-model="paymentEvidence" @@change="preview_paymentEvidence"  ></v-file-input>
+                                    </v-card-actions>
+                                </v-card>
+                            </v-col>
+                            <span class="h6">หลังจากอัพโหลดหลักฐานเรียบร้อยเเล้วโปรดรอแอดมินตรวจสอบและอนุมัต หากมีข้อสงสัย โทร 029102912 Admin dogTown</span>
+                            <v-btn @@click="overlay1 = false">ยกเลิก</v-btn>
+                            <v-btn v-if="bill==59" @@click="confirmBuyDiamond">ยืนยัน</v-btn>
+                            <v-btn v-if="bill!=59" @@click="confirmBuyChampion">ยืนยัน</v-btn>
+                        </v-card-text>
+                    </v-card>
+                </v-responsive>
+            </v-overlay>
+            <br><br>
+            <div class="h1 grey--text">ประวัติการซื้อแพ็คเกจ</div>
+            <table class="table">
+                <tr>
+                    <th>รหัสบิล</th>
+                    <th>ชื่อแพ็คเกจ</th>
+                    <th>ราคา</th>
+                    <th>วันที่ซื้อ</th>
+                    <th>วันที่ผู้ดูแลระบบอนุมัตและเริ่มใช้</th>
+                    <th>วันหมดอายุ</th>
+                    <th>สถานะ</th>
+                </tr>
+                <tr v-for="n in history">
+                    <td>{{n.sellerPackageId}}</td>
+                    <td>{{n.packageDetail.packageDetailName}}</td>
+                    <td>{{n.packageDetail.price}}</td>
+                    <td>{{n.packageBuyingDateTime}}</td>
+                    <td>{{n.packageStartingDateTime}}</td>
+                    <td>{{n.packageEndingDateTime}}</td>
+                    <td>{{n.packageStatus}}</td>
+                </tr>
+            </table>
+
+        </v-main>
+    </v-app>
+</div>
+@section Scripts{
+    <script>
+        var component ={
+            vuetify : new Vuetify(theme())
+            ,
+            el:"#app1"
+            ,
+            data:{
+                seller:{},
+                sellerPackage:{},
+                packageDetails:{},
+                paymentEvidenceData:'',
+				paymentEvidence:[],
+                overlay1:false,
+                zIndex:1,
+                bill:0,
+                history:[]
+            }//edata
+            ,
+            created(){
+                this.seller = @Html.Raw(Json.Serialize(@ViewBag.seller));
+                this.seller.sellerProfilePic = "/sellerProfilePic/"+this.seller.sellerId+"sellerProfilePic.png";
+                this.sellerPackage = @Html.Raw(Json.Serialize(@ViewBag.sellerPackage));
+                this.packageDetails = @Html.Raw(Json.Serialize(@ViewBag.packageDetails));
+
+                var nameOfMonth = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤษจิกายน', 'ธันวาคม'];
+                var date = this.sellerPackage.packageBuyingDateTime.slice(8, 10);
+                var month = this.sellerPackage.packageBuyingDateTime.slice(5, 7);
+                var monthName = nameOfMonth[parseInt(month) - 1]
+                var year = parseInt(this.sellerPackage.packageBuyingDateTime.slice(0, 4)) + 543;
+                var time = this.sellerPackage.packageBuyingDateTime.slice(11, 16);
+                this.sellerPackage.packageBuyingDateTime = date+" "+monthName+" "+year;
+
+                date = this.sellerPackage.packageStartingDateTime.slice(8, 10);
+                month = this.sellerPackage.packageStartingDateTime.slice(5, 7);
+                monthName = nameOfMonth[parseInt(month) - 1]
+                year = parseInt(this.sellerPackage.packageStartingDateTime.slice(0, 4)) + 543;
+                time = this.sellerPackage.packageStartingDateTime.slice(11, 16);
+                this.sellerPackage.packageStartingDateTime = date+" "+monthName+" "+year;
+
+                date = this.sellerPackage.packageEndingDateTime.slice(8, 10);
+                month = this.sellerPackage.packageEndingDateTime.slice(5, 7);
+                monthName = nameOfMonth[parseInt(month) - 1]
+                year = parseInt(this.sellerPackage.packageEndingDateTime.slice(0, 4)) + 543;
+                time = this.sellerPackage.packageEndingDateTime.slice(11, 16);
+                this.sellerPackage.packageEndingDateTime = date+" "+monthName+" "+year;
+
+
+
+
+                //===history===
+                this.history = @Html.Raw(Json.Serialize(@ViewBag.history));
+                console.log(this.history);
+
+                nameOfMonth = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤษจิกายน', 'ธันวาคม'];
+                for (var i = 0; i < this.history.length; i++) {
+                    var date = this.history[i].packageBuyingDateTime.slice(8, 10);
+                    var month = this.history[i].packageBuyingDateTime.slice(5, 7);
+                    var monthName = nameOfMonth[parseInt(month) - 1]
+                    var year = parseInt(this.history[i].packageBuyingDateTime.slice(0, 4)) + 543;
+                    var time = this.history[i].packageBuyingDateTime.slice(11, 16);
+                    this.history[i].packageBuyingDateTime = date+" "+monthName+" "+year;
+
+                    var date = this.history[i].packageStartingDateTime.slice(8, 10);
+                    var month = this.history[i].packageStartingDateTime.slice(5, 7);
+                    var monthName = nameOfMonth[parseInt(month) - 1]
+                    var year = parseInt(this.history[i].packageStartingDateTime.slice(0, 4)) + 543;
+                    var time = this.history[i].packageStartingDateTime.slice(11, 16);
+                    if(year=="544"){
+                        this.history[i].packageStartingDateTime = "-"
+                    }//econ
+                    else if(year!="544"){
+                        this.history[i].packageStartingDateTime = date+" "+monthName+" "+year;
+                    }//econ
+
+                    var date = this.history[i].packageEndingDateTime.slice(8, 10);
+                    var month = this.history[i].packageEndingDateTime.slice(5, 7);
+                    var monthName = nameOfMonth[parseInt(month) - 1]
+                    var year = parseInt(this.history[i].packageEndingDateTime.slice(0, 4)) + 543;
+                    var time = this.history[i].packageEndingDateTime.slice(11, 16);
+                    if(year=="544"){
+                        this.history[i].packageEndingDateTime = "-"
+                    }//econ
+                    else if(year!="544"){
+                        this.history[i].packageEndingDateTime = date+" "+monthName+" "+year;
+                    }//econ
+                    
+                    //status part
+                    if(this.history[i].packageStatus==0){
+                        this.history[i].packageStatus ="รอแอดมินตรวจสอบ"
+                    }//econ
+                    else if(this.history[i].packageStatus==1){
+                        this.history[i].packageStatus ="ซื้อสำเร็จ(ใช้งานอยู่)"
+                    }
+                    else if(this.history[i].packageStatus==-1){
+                        this.history[i].packageStatus ="ซื้อสำเร็จ(หมดอายุแล้ว)"
+                    }
+                    else if(this.history[i].packageStatus==-2){
+                        this.history[i].packageStatus ="ซื้อไม่สำเร็จ"
+                    }
+                }//eloop           
+            }//ecreated
+            ,
+            mounted(){
+                @* if(this.sellerPackage.packageDetailId == 2){
+                    document.getElementById("diamond").setAttribute("disabled","disabled")
+                }//econ
+                if(this.sellerPackage.packageDetailId == 3){
+                    document.getElementById("champion").setAttribute("disabled","disabled")
+                    document.getElementById("diamond").setAttribute("disabled","disabled")
+                }//econ *@
+                for(var i of this.history){
+                    if(i.packageStatus=="รอแอดมินตรวจสอบ"){
+                        document.getElementById("diamond").setAttribute("disabled","disabled")
+                        document.getElementById("champion").setAttribute("disabled","disabled")
+                        break;
+                    }//econ
+                }//eloop
+            }//emounted
+            ,
+            methods:{
+                buyDiamond(){
+                    this.overlay1 = !this.overlay1;                    
+                    this.bill=this.packageDetails[1].price;
+                }//ef
+                ,
+                confirmBuyDiamond(){
+                    param={sellerId:this.seller.sellerId,totalPostAvailable:this.packageDetails[1].totalPostOfPackage,packageStatus:0,totalPackagePurchase:this.packageDetails[1].price,packageDetailId:this.packageDetails[1].packageDetailId,paymentEvidence:this.paymentEvidenceData}
+                    if(param.paymentEvidence == ""){
+                        alert("กรุณาอัพโหลดรูปภาพยืนยันการโอนเงิน");return;
+                    }
+                    $.post("/SellerPackage2/Add",param).done(res=>{
+                        if(res.error==-1){
+                            alert("ส่งหลักฐานการชำระเงินเรียบร้อย โปรดรอผู้ดูเเลระบบตรวจสอบ")
+                            location.reload();
+                        }//econ
+                        else{
+                            alert(res.exception)
+                        }//econ
+                    })//epost
+                }//ef
+                ,
+                buyChampion(){
+                    this.overlay1 = !this.overlay1;                    
+                    this.bill=this.packageDetails[2].price;
+                }//ef
+                ,
+                confirmBuyChampion(){
+                    param={sellerId:this.seller.sellerId,totalPostAvailable:this.packageDetails[2].totalPostOfPackage,packageStatus:0,totalPackagePurchase:this.packageDetails[2].price,packageDetailId:this.packageDetails[2].packageDetailId,paymentEvidence:this.paymentEvidenceData}
+                    if(param.paymentEvidence == ""){
+                        alert("กรุณาอัพโหลดรูปภาพยืนยันการโอนเงิน");return;
+                    }
+                    $.post("/SellerPackage2/Add",param).done(res=>{
+                        if(res.error==-1){
+                            alert("ส่งหลักฐานการชำระเงินเรียบร้อย โปรดรอผู้ดูเเลระบบตรวจสอบ")
+                            location.reload();
+                        }//econ
+                        else{
+                            alert(res.exception)
+                        }//econ
+                    })//epost
+                }//ef
+                ,
+                preview_paymentEvidence(){
+                    const width = 800;
+                    const height = 800;
+                    const reader = new FileReader();
+                    reader.readAsDataURL(this.paymentEvidence); //file1
+                    reader.onload = () => {
+                        //1.create an image instance
+                        const img = new Image();
+
+                        //2.get the image src from reader
+                        img.src = event.target.result;
+
+                        //3.when the image is fully loaded, call onload
+                        img.onload = () => {
+                            //4 create dynamic html element as elem
+                            const elem = document.createElement('canvas')
+
+                            //5.set width and height of elem
+                            elem.width = width;
+                            elem.height = height;
+
+                            //6.setup the canvas as a blank2d drawing board
+                            const ctx = elem.getContext('2d');
+
+                            //7draw the content of the image instance  into the blank 2d drawing board
+                            ctx.drawImage(img, 0, 0, width, height)
+
+                            //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                            this.paymentEvidenceData = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                        }
+                    }
+                    reader.onerror = function (error) {
+                        console.log('Error: ', error)
+                    }//ev
+                }//ef
+                
+            }//emethods
+            
+        }//ecomponent
+        var app = new Vue(component);
+    </script>
+}

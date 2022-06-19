@@ -1,0 +1,219 @@
+<nav aria-label='breadcrumb'>
+    <ol class='breadcrumb breadcrumb-arrow'>
+        <li class='breadcrumb-item'><a href='/seller/index'>seller</a></li>
+        <li class='breadcrumb-item active' aria-current='page'>edit</li>
+    </ol>
+</nav>
+<div id='app1' v-cloak>
+
+    <v-app>
+
+        <v-card>
+            <v-card-title>
+            </v-card-title>
+            <v-card-text>
+                <div style="margin:20px">
+                    <div style="margin:20px">
+                        <v-text-field disabled v-model="user.value" label="ชื่อผู้ใช้งาน"></v-text-field>
+                    </div>
+                </div>
+                <div style="margin:20px">
+                    <div style="margin:20px">
+                        <v-text-field disabled v-model="user.phoneNumber" label="เบอร์โทร"></v-text-field>
+                    </div>
+                </div>
+
+                <div style="margin:20px">
+                    <div style="margin:20px">
+                        <v-text-field disabled v-model="seller.sellerIdCard" label="เลข 13 หลัก บัตรประชาชน">
+                        </v-text-field>
+                    </div>
+                </div>
+
+                <v-col cols="3">
+
+                    <v-card>
+                        <v-card-text>
+                            <v-img @@click="overlay1 = !overlay1" :src="sellerIdCardFrontData"></v-img>
+                            <v-card-title>
+                                <span class="h6">รูปภาพด้านหน้าของบัตรประชาชน</span>
+                                <v-overlay :z-index="zIndex" :value="overlay1">
+                                    <v-img @@click="overlay1 = false" :src="sellerIdCardFrontData"></v-img>
+                                </v-overlay>
+                        </v-card-text>
+                    </v-card>
+
+                </v-col>
+
+
+                <v-col cols="3">
+                    <v-card>
+                        <v-card-text>
+                            <v-img @@click="overlay2 = !overlay2" :src="sellerIdCardBackData"></v-img>
+                            <span class="h6">รูปภาพด้านหลังของบัตรประชาชน</span>
+                            <v-overlay :z-index="zIndex" :value="overlay2">
+                                    <v-img @@click="overlay2 = false" :src="sellerIdCardBackData"></v-img>
+                            </v-overlay>
+                        </v-card-text>
+                    </v-card>
+
+                </v-col>
+
+
+                <v-col cols="3">
+                    <v-card>
+                        <v-card-text>
+                            <v-img @@click="overlay3 = !overlay3" :src="selllerBookBankAccountPicData"></v-img>
+                            <span class="h6">รูปภาพสมุดบัญชีธนาคาร</span>
+                            <v-overlay :z-index="zIndex" :value="overlay3">
+                                    <v-img @@click="overlay3 = false" :src="selllerBookBankAccountPicData"></v-img>
+                            </v-overlay>
+                            </v-card-actions>
+                    </v-card>
+
+                </v-col>
+
+
+                <v-col cols="3">
+                    <v-card>
+                        <v-card-text>
+                            <v-img @@click="overlay4 = !overlay4" :src="sellerFarmRegisterPicData"></v-img>
+                            <span class="h6">รูปภาพการจดทะเบียนฟาร์มสุนัข</span>
+                            <v-overlay :z-index="zIndex" :value="overlay4">
+                                    <v-img @@click="overlay4 = false" :src="sellerFarmRegisterPicData"></v-img>
+                            </v-overlay>
+                        </v-card-text>
+                    </v-card>
+                </v-col>
+
+                <div style="margin:20px">
+                    <span id="memoCheck" class="red--text"></span>
+                    <div style="margin:20px">
+                        <v-text-field v-model="memo" label="หากปฏิเสธ โปรดให้เหตุผล"></v-text-field>
+                    </div>
+                </div>
+
+
+            </v-card-text>
+            <v-card-actions>
+                <v-btn @@click='approveSeller2' color='blue' outlined>
+                    <v-icon>
+                        mdi-content-save-edit
+                    </v-icon>
+                </v-btn>
+                <v-btn @@click='rejectSeller2' color='blue' outlined>
+                    <v-icon>
+                        mdi-cancel
+                    </v-icon>
+                </v-btn>
+            </v-card-actions>
+
+        </v-card>
+    </v-app>
+</div>
+@section scripts{
+<script>
+    var app;
+    var component = {
+        vuetify: new Vuetify(theme())
+        ,
+        el: '#app1'
+        ,
+        data: {
+            seller: {},
+            user: {},
+            sellerIdCardFrontData: '',
+            sellerIdCardFront: [],
+
+            sellerIdCardBackData: '',
+            sellerIdCardBack: [],
+
+            selllerBookBankAccountPicData: '',
+            selllerBookBankAccountPic: [],
+
+            sellerFarmRegisterPicData: '',
+            sellerFarmRegisterPic: [],
+
+            memo: "",
+
+            //overlay part for pop up image
+            overlay1: false,
+            overlay2:false,
+            overlay3:false,
+            overlay4:false,
+            zIndex: 1
+
+        }//edata
+        ,
+        created() {
+            this.seller = @Html.Raw(Json.Serialize(@ViewBag.seller));
+            this.user = @Html.Raw(Json.Serialize(@ViewBag.user));
+            this.user = this.user[0];
+            
+
+
+            this.sellerIdCardFrontData = "/sellerRegisterPic/" + this.seller.sellerId + "sellerIdCardFront.png";
+            this.sellerIdCardBackData = "/sellerRegisterPic/" + this.seller.sellerId + "sellerIdCardBack.png";
+            this.selllerBookBankAccountPicData = "/sellerRegisterPic/" + this.seller.sellerId + "selllerBookBankAccountPic.png";
+            this.sellerFarmRegisterPicData = this.seller.sellerFarmRegisterPic;
+            console.log(this.sellerFarmRegisterPicData);
+
+            console.log(this.user);
+
+
+
+
+        }//ecreated
+        ,
+        methods: {
+            approveSeller2() {
+                var url = '/Admin/approveSeller2';
+                var param = { uId: this.user.id, sellerId: this.seller.sellerId, status: 1, memo: this.memo };
+                $.post(url, param)
+                    .done(res => {
+                        if (res.error == -1) {
+                            alert(res.message)
+                            window.location = '/Admin/approveSeller';
+                        }
+                        else {
+                            alert(res.exception);
+                        }
+                    });
+
+            }//ef
+            ,
+            rejectSeller2() {
+                if (this.memo == "" || this.memo == undefined || this.memo == null) {
+                    document.getElementById("memoCheck").innerHTML = "กรุณาให้เหตุผลหากปฎิเสธ"
+                    return;
+                }
+                var url = '/Admin/approveSeller2';
+                var param = { uId: this.user.id, sellerId: this.seller.sellerId, status: -1, memo: this.memo };
+                $.post(url, param)
+                    .done(res => {
+                        if (res.error == -1) {
+                            alert(res.message)
+                            window.location = '/Admin/approveSeller';
+                        }
+                        else {
+                            alert(res.exception);
+                        }
+                    });
+
+            }//ef
+
+        }//emethod
+        ,
+        computed: {
+        }//ecomputed
+        ,
+        mounted(){
+            
+        }//emounted
+    };
+    app = new Vue(component);
+
+
+</script>
+
+}

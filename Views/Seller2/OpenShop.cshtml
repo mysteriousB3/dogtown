@@ -1,0 +1,542 @@
+<div id='app1' v-cloak>
+    <v-app>
+        <v-card>
+            <v-card-title>
+                <span class="h1" style="margin: auto;" >ลงทะเบียนเปิดร้าน</span>
+            </v-card-title>
+            <v-card-text>
+                <div style="margin:20px">
+                    <span class="h2 grey--text">กรุณากรอกเลขบัตรประชาชน 13 หลัก</span>
+                    <span id="idCheck" class="red--text"></span>
+                    <v-text-field v-model="seller.sellerIdCard" label="ตัวอย่าง 1103910212131"></v-text-field>
+                </div>
+
+                <span class="h2 grey--text">กรุณาแนบรูปด้านหน้าของบัตรประชาชน</span>
+                <span id="fontCheck" class="red--text"></span>
+                <v-col cols="3">
+                    <v-card>
+                        <v-card-text>
+                            <v-img :src="sellerIdCardFrontData"></v-img>
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-file-input label="รูปภาพด้านหน้าของบัตรประชาชน" v-model="sellerIdCardFront"
+                                @@change="preview_sellerIdCardFront"></v-file-input>
+                        </v-card-actions>
+                    </v-card>
+
+                </v-col>
+
+                <span class="h2 grey--text">กรุณาแนบรูปด้านหลังของบัตรประชาชน</span>
+                <span id="backCheck" class="red--text"></span>
+                <v-col cols="3">
+                    <v-card>
+                        <v-card-text>
+                            <v-img :src="sellerIdCardBackData"></v-img>
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-file-input label="รูปภาพด้านหลังของบัตรประชาชน" v-model="sellerIdCardBack"
+                                @@change="preview_sellerIdCardBack"></v-file-input>
+                        </v-card-actions>
+                    </v-card>
+
+                </v-col>
+
+                <span class="h2 grey--text">กรุณาแนบรูปสมุดบัญชี ที่มีชื่อตรงกับเลขบนบัตรประชาชน</span>
+                <span id="bookCheck" class="red--text"></span>
+                <v-col cols="3">
+                    <v-card>
+                        <v-card-text>
+                            <v-img :src="selllerBookBankAccountPicData"></v-img>
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-file-input label="รูปภาพสมุดบัญชีธนาคาร" v-model="selllerBookBankAccountPic"
+                                @@change="preview_selllerBookBankAccountPic"></v-file-input>
+                        </v-card-actions>
+                    </v-card>
+                </v-col>
+
+                <span class="h2 grey--text">กรุณาแนบรูปใบลงทะเบียนฟาร์ม</span><br>
+                <span class="h5 grey--text">ถ้าไม่มี ไม่จำเป็นต้องใส่ ท่านสามารถข้ามขั้นตอนนี้ได้เลย</span>
+                <v-col cols="3">
+                    <v-card>
+                        <v-card-text>
+                            <v-img :src="sellerFarmRegisterPicData"></v-img>
+                        </v-card-text>
+                        <v-card-actions>
+                            <v-file-input label="รูปภาพใบลงทะเบียนฟาร์มสุนัข" v-model="sellerFarmRegisterPic"
+                                @@change="preview_sellerFarmRegisterPic"></v-file-input>
+                        </v-card-actions>
+                    </v-card>
+                </v-col>
+
+                <v-card-title>
+                    <span class="h1" style="margin: auto;" >ที่อยู่</span>
+                </v-card-title>
+                <div style="margin:20px">
+                    <v-row>
+                        <v-col cols="3">
+                            <span class="h2 grey--text">บ้านเลขที่</span>
+                            <span id="hNoCheck" class="red--text"></span>
+                            <v-text-field v-model="sellerAddress.number"  label="ตัวอย่าง 444/222"></v-text-field>
+                        </v-col>
+
+                        <v-col cols="3">
+                            <span class="h2 grey--text">ซอย</span>
+                            <span id="soiCheck" class="red--text"></span>
+                            <v-text-field v-model="sellerAddress.soi" label="ตัวอย่าง 2"></v-text-field>
+                        </v-col>
+
+                        <v-col cols="3">
+                            <span class="h2 grey--text">หมู่</span>
+                            <span id="mooCheck" class="red--text"></span>
+                            <v-text-field v-model="sellerAddress.moo" label="ตัวอย่าง 1"></v-text-field>
+                        </v-col>
+
+                        <v-col cols="3">
+                            <span class="h2 grey--text">ตำบล</span>
+                            <span id="tambonCheck" class="red--text"></span>
+                            <v-text-field v-model="sellerAddress.tambon" label="ตัวอย่าง บางบ่อ"></v-text-field>
+                        </v-col>
+
+                        <v-col cols="3">
+                            <span class="h2 grey--text">อำเภอ</span>
+                            <span id="amphoeCheck" class="red--text"></span>
+                            <v-text-field v-model="sellerAddress.amphoe"  label="ตัวอย่าง บางบ่อ"></v-text-field>
+                        </v-col>
+
+                        <v-col cols="3">
+                            <span class="h2 grey--text">ถนน</span>
+                            <span id="streetCheck" class="red--text"></span>
+                            <v-text-field v-model="sellerAddress.street"  label="ตัวอย่าง เทพารักษ์"></v-text-field>
+                        </v-col>
+
+                        <v-col cols="3">
+                            <span class="h2 grey--text">จังหวัด</span>
+                            <span id="provinceCheck" class="red--text"></span>
+                            <v-text-field v-model="sellerAddress.province" label="ตัวอย่าง สมุทรปราการ"></v-text-field>
+                        </v-col>
+
+                        <v-col cols="3">
+                            <span class="h2 grey--text">รหัสไปรษณีย์</span>
+                            <span id="postNumberCheck" class="red--text"></span>
+                            <v-text-field v-model="sellerAddress.postNumber" label="ตัวอย่าง 10540"></v-text-field>
+                        </v-col>
+
+                    </v-row>    
+                </div>
+            </v-card-text>
+
+            <span  style="margin:20px" class="h5 grey--text">การลงทะเบียนเปิดร้าน จะต้องรอการอนุญาตจากผู้ดูเเลระบบก่อน และข้อมูลของท่านเราจะเก็บไว้อย่างปลอดภัยที่สุด</span><br>
+            <div style="margin: 20px;">
+                <ul>
+                    <li>การเก็บข้อมูลบัตรที่ท่านกรอกในหน้านี้ โดยรวมไปถึงบัตรประชาชน พร้อมแนบรูป ภาพถ่ายสมุดบัญชี และใบจดทะเบียนฟาร์ม โดยมีวัตถุประสงค์เพื่อให้ผู้ดูแลระบบตรวจสอบว่าฟาร์ม หรือการร้านค้าขายของท่านมีตัวตนอยู่จริงๆ ไม่ได้มาหลอกผู้อื่น หากท่านมาหลอกผู้อื่นและได้รับการร้องเรียน เราจะติดต่อท่านไปโดยตรงเพื่อสอบถามโดยใช้ข้อมูลชุดนี้นี้
+                ที่ท่าได้กรอกลงไป และหากพบว่าท่านมีความผิดจริง เราจะขอใช้หลักฐานชุดนี้เป็นการยืนยันตัวตนของท่าน ในการดำเนินคดีต่อๆไป
+                </li>
+                <li>
+                    เราจะเก็บข้อมูลชุดนี้ไว้ให้เพียงแค่ ผู้ดูแลระบบเท่านั้นที่สามารถเข้าถึงได้และจะไม่มีใครเข้าไปแก้ไขข้อมูลของท่านได้
+                </li>
+                <li>
+                    หากท่าต้องลบข้อมูลชุดนี้ท่านสามารถลบได้โดยการยกเลิกการเป็นผู้ขาย หลังจากสมัครการเปิดร้านค้าเป็นผู้ขายกับทางเราเรียบร้อยแล้ว
+                </li>
+                </ul>
+                <span>หากอ่านรายละเอียดเรียบร้อยแล้วหากท่านยินยอมให้เราเก็บข้อมูลชุดนี้โปรดกดยินยอม</span><br>
+                <v-radio-group v-model="accept" @@change="acceptChange">
+                    <v-radio value="1">
+                        <template v-slot:label>
+                            <strong class="dark--text">ข้าพเจ้ารับทราบและยินยอม</strong>
+                        </template>
+                    </v-radio>
+                    <v-radio value="2">
+                        <template v-slot:label>
+                            <strong class="dark--text">ข้าพเจ้าไม่ยินยอม</strong>
+                        </template>
+                    </v-radio>
+                </v-radio-group>
+            </div>
+            <v-card-actions>
+                <button id="openShopButton" disabled @@click='add_seller' class="btn btn-large btn-primary">เปิดร้าน</button>
+            </v-card-actions>
+
+        </v-card>
+    </v-app>
+</div>
+@section scripts{
+<script>
+    var app;
+    var component = {
+        vuetify: new Vuetify(theme())
+        ,
+        el: '#app1'
+        ,
+        data: {
+            seller: {}
+            ,
+            user: {},
+            select_user: {},
+            sellerIdCardFrontData: '',
+            sellerIdCardFront: [],
+
+            sellerIdCardBackData: '',
+            sellerIdCardBack: [],
+
+            selllerBookBankAccountPicData: '',
+            selllerBookBankAccountPic: [],
+
+            sellerFarmRegisterPicData: '',
+            sellerFarmRegisterPic: [],
+
+            sellerAddress:{number:"",soi:"",moo:"",tambon:"",amphoe:"",street:"",province:"",postNumber:"",userId:""},
+            accept:0
+
+
+        }//edata
+        ,
+        created() {
+
+            //=== begin user ===
+            this.user = @Html.Raw(Json.Serialize(@ViewBag.user));
+            //=== begin user ===
+
+
+        }//ecreated
+        ,
+        methods: {
+            add_seller() {
+                var count1 = 0;
+                var count2 = 0;
+                var count3 = 0;
+                var count4 = 0;
+
+                //check completeness
+                if(this.seller.sellerIdCard == undefined || this.seller.sellerIdCard.length != 13 || this.seller.sellerIdCard ==""){
+                    document.getElementById("idCheck").innerHTML="กรุณาตรวจสอบความถูกต้องและความสมบูรณ์ของเลขบัตรประชาชน"
+                    count1=0;
+                }//econ
+                else if(this.seller.sellerIdCard != undefined && this.seller.sellerIdCard.length != 13 || this.seller.sellerIdCard !=""){
+                    document.getElementById("idCheck").innerHTML="";
+                    count1=1
+                }//econ
+
+                if(this.sellerIdCardFrontData == ""){
+                    document.getElementById("fontCheck").innerHTML="กรุณาแนบรูปด้านหน้าของบัตรประชาชน"
+                    count2=0;
+                }//econ
+                else if(this.sellerIdCardFrontData != ""){
+                    document.getElementById("fontCheck").innerHTML=""
+                    count2=1;
+                }//econ
+
+                if(this.sellerIdCardBackData == ""){
+                    document.getElementById("backCheck").innerHTML="กรุณาแนบรูปด้านหลังของบัตรประชาชน"
+                    count3=0;
+                }//econ
+                else if(this.sellerIdCardBackData != ""){
+                    document.getElementById("backCheck").innerHTML=""
+                    count3=1;
+                }//econ
+
+                if(this.selllerBookBankAccountPicData == ""){
+                    document.getElementById("bookCheck").innerHTML="กรุณาแนบรูปสมุดบัญชี"
+                    count4=0;
+                }//econ
+                else if(this.selllerBookBankAccountPicData != ""){
+                    document.getElementById("bookCheck").innerHTML=""
+                    count4=1;
+                }//econ
+                
+                if(count1 != 1 || count2 != 1 || count3 != 1 || count4 != 1){
+                    return;
+                }
+
+                //address part
+                var a1 = 0;
+                var a2 = 0;
+                var a3 = 0;
+                var a4 = 0;
+                var a5 = 0;
+                var a6 = 0;
+                var a7 = 0;
+                var a8 = 0;
+                if(this.sellerAddress.number == ""){
+                    document.getElementById("hNoCheck").innerHTML ="กรุณาใส่บ้านเลขที่"
+                    a1=0;
+                }//econ
+                else if(this.sellerAddress.number != ""){
+                    document.getElementById("hNoCheck").innerHTML =""
+                    a1=1;
+                }//econ
+
+                if(this.sellerAddress.soi == ""){
+                    document.getElementById("soiCheck").innerHTML ="กรุณาใส่ซอย"
+                    a2=0;
+                }//econ
+                else if(this.sellerAddress.soi != ""){
+                    document.getElementById("soiCheck").innerHTML =""
+                    a2=1;
+                }//econ
+
+                if(this.sellerAddress.moo == ""){
+                    document.getElementById("mooCheck").innerHTML ="กรุณาใส่หมู่"
+                    a3=0;
+                }//econ
+                else if(this.sellerAddress.moo != ""){
+                    document.getElementById("mooCheck").innerHTML =""
+                    a3=1;
+                }//econ
+
+                if(this.sellerAddress.tambon == ""){
+                    document.getElementById("tambonCheck").innerHTML ="กรุณาใส่ตำบล"
+                    a4=0;
+                }//econ
+                else if(this.sellerAddress.tambon != ""){
+                    document.getElementById("tambonCheck").innerHTML =""
+                    a4=1;
+                }//econ
+
+                if(this.sellerAddress.amphoe == ""){
+                    document.getElementById("amphoeCheck").innerHTML ="กรุณาใส่อำเภอ"
+                    a5=0;
+                }//econ
+                else if(this.sellerAddress.amphoe != ""){
+                    document.getElementById("amphoeCheck").innerHTML =""
+                    a5=1;
+                }//econ
+
+                if(this.sellerAddress.street == ""){
+                    document.getElementById("streetCheck").innerHTML ="กรุณาใส่ถนน"
+                    a6=0;
+                }//econ
+                else if(this.sellerAddress.street != ""){
+                    document.getElementById("streetCheck").innerHTML =""
+                    a6=1;
+                }//econ
+
+                if(this.sellerAddress.province == ""){
+                    document.getElementById("provinceCheck").innerHTML ="กรุณาใส่จังหวัด"
+                    a7=0;
+                }//econ
+                else if(this.sellerAddress.province != ""){
+                    document.getElementById("provinceCheck").innerHTML =""
+                    a7=1;
+                }//econ
+
+                if(this.sellerAddress.postNumber == ""){
+                    document.getElementById("postNumberCheck").innerHTML ="กรุณาใส่รหัสไปรษณีย์"
+                    a8=0;
+                }//econ
+                else if(this.sellerAddress.postNumber != ""){
+                    document.getElementById("postNumberCheck").innerHTML =""
+                    a8=1;
+                }//econ
+
+                if(a1 !=1 || a2 !=1 || a3 !=1 || a4 !=1 || a5 !=1 || a6 !=1 || a7 !=1 || a8 !=1 ){
+                    return;
+                }//econ
+                if(this.accept != 1){
+                    return;
+                }//econ
+                this.sellerAddress.userId = this.user.id; 
+                var param2 = {number:this.sellerAddress.number,soi:this.sellerAddress.soi,moo:this.sellerAddress.moo,tambon:this.sellerAddress.tambon,amphoe:this.sellerAddress.amphoe,street:this.sellerAddress.street,province:this.sellerAddress.province,postNumber:this.sellerAddress.postNumber,userId:this.user.id}
+                
+
+                
+
+                this.seller.userId = this.user.id;
+                this.seller.sellerIdCardFront = this.sellerIdCardFrontData;
+                this.seller.sellerIdCardBack = this.sellerIdCardBackData;
+                this.seller.selllerBookBankAccountPic = this.selllerBookBankAccountPicData;
+                this.seller.sellerFarmRegisterPic = this.sellerFarmRegisterPicData;
+                var url = '/seller2/openshopAddress';
+                var param = this.seller;
+                $.post(url,param2)
+                    .done(res => {
+                        if (res.error == -1) {
+                            url = '/seller2/openshop';
+                            $.post(url,param).done(res=>{
+                                if(res.error ==-1){
+                                    alert("ลงทะเบียนผู้ขายเรียบร้อย กรุณารอผู้ดูแลระบบตรวจสอบ");
+                                    window.location = "/Home"
+                                }//econ
+                                else{
+                                    alert(res.exception)
+                                }
+                            })//epost
+                        }
+                        else {
+                            alert(res.exception);
+                        }
+                    });
+            }//ef
+            ,
+            preview_sellerIdCardFront() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.sellerIdCardFront); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+                    
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () =>{
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img,0,0,width,height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.sellerIdCardFrontData = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef    
+            ,
+            preview_sellerIdCardBack() {
+                const width = 800;
+                const height = 800
+                const reader = new FileReader();
+                reader.readAsDataURL(this.sellerIdCardBack); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+                    
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () =>{
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img,0,0,width,height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.sellerIdCardBackData = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef    
+            ,
+            preview_selllerBookBankAccountPic() {
+                const width = 800;
+                const height = 800
+                const reader = new FileReader();
+                reader.readAsDataURL(this.selllerBookBankAccountPic); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+                    
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () =>{
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img,0,0,width,height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.selllerBookBankAccountPicData = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef    
+            ,
+            
+            preview_sellerFarmRegisterPic() {
+                const width = 800;
+                const height = 800
+                const reader = new FileReader();
+                reader.readAsDataURL(this.sellerFarmRegisterPic); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+                    
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () =>{
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img,0,0,width,height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.sellerFarmRegisterPicData = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef    
+            ,
+            acceptChange(){
+                if(this.accept==1){
+                    document.getElementById("openShopButton").removeAttribute("disabled");
+                }
+                else if(this.accept!=1){
+                    document.getElementById("openShopButton").setAttribute("disabled","disabled");
+                }
+            }//ef
+
+
+        }//emethod
+        ,
+        computed: {
+
+        }//ecomputed
+        ,
+        mounted(){
+            
+        }//emounted
+    };
+    app = new Vue(component);
+
+
+</script>
+
+}

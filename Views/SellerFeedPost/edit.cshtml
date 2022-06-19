@@ -1,0 +1,258 @@
+<nav aria-label='breadcrumb'>
+    <ol class='breadcrumb breadcrumb-arrow'>
+        <li class='breadcrumb-item'><a href='/sellerfeedpost/index'>sellerfeedpost</a></li>
+        <li class='breadcrumb-item active' aria-current='page'>edit</li>
+    </ol>
+</nav>
+<div id='app1' v-cloak>
+
+    <v-app>
+         
+        <v-card>
+          <v-card-title>
+          </v-card-title>
+          <v-card-text>
+            <div style="margin:20px">
+<v-select return-object
+		  outlined
+          v-model="select_seller"
+          :items="sellers"
+          item-text='value'
+          menu-props="auto"
+          label="sellerId"
+          show="sellerId" 
+           
+  ></v-select>
+</div>
+
+<v-col cols="3">
+  <v-card>
+    <v-card-text>
+     <v-img :src="feedPostPic1Data"   ></v-img>
+    </v-card-text>
+    <v-card-actions>
+      <v-file-input label="รูปภาพฟีดโพสต์1" v-model="feedPostPic1" @@change="preview_feedPostPic1"  ></v-file-input>
+    </v-card-actions>
+  </v-card>
+ 
+</v-col>
+ 
+
+<v-col cols="3">
+  <v-card>
+    <v-card-text>
+     <v-img :src="feedPostPic2Data"   ></v-img>
+    </v-card-text>
+    <v-card-actions>
+      <v-file-input label="รูปภาพฟีดโพสต์2" v-model="feedPostPic2" @@change="preview_feedPostPic2"  ></v-file-input>
+    </v-card-actions>
+  </v-card>
+ 
+</v-col>
+ 
+
+<v-col cols="3">
+  <v-card>
+    <v-card-text>
+     <v-img :src="feedPostPic3Data"   ></v-img>
+    </v-card-text>
+    <v-card-actions>
+      <v-file-input label="รูปภาพฟีดโพสต์3" v-model="feedPostPic3" @@change="preview_feedPostPic3"  ></v-file-input>
+    </v-card-actions>
+  </v-card>
+ 
+</v-col>
+ 
+
+<v-col cols="3">
+  <v-card>
+    <v-card-text>
+     <v-img :src="feedPostPic4Data"   ></v-img>
+    </v-card-text>
+    <v-card-actions>
+      <v-file-input label="รูปภาพฟีดโพสต์4" v-model="feedPostPic4" @@change="preview_feedPostPic4"  ></v-file-input>
+    </v-card-actions>
+  </v-card>
+ 
+</v-col>
+ 
+
+<v-col cols="3">
+  <v-card>
+    <v-card-text>
+     <v-img :src="feedPostPic5Data"   ></v-img>
+    </v-card-text>
+    <v-card-actions>
+      <v-file-input label="รูปภาพฟีดโพสต์5" v-model="feedPostPic5" @@change="preview_feedPostPic5"  ></v-file-input>
+    </v-card-actions>
+  </v-card>
+ 
+</v-col>
+ 
+
+ <v-date-picker
+      v-model="sellerfeedpost.postingDateTime"
+      class="mt-4"
+      
+      
+></v-date-picker>
+
+<div style="margin:20px"><v-text-field  v-model="sellerfeedpost.description" label="คำบรรยายฟีดโพสต์" ></v-text-field></div>
+
+
+          </v-card-text>
+          <v-card-actions>
+             <v-btn @@click='edit_sellerfeedpost' color='blue' outlined>
+                <v-icon>
+                    mdi-content-save-edit
+                </v-icon>
+             </v-btn>
+          </v-card-actions>
+          
+        </v-card>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                    sellerfeedpost:{}
+                    ,
+                    sellers:[] ,
+select_seller:{},
+feedPostPic1Data:'',
+				feedPostPic1:[],
+
+feedPostPic2Data:'',
+				feedPostPic2:[],
+
+feedPostPic3Data:'',
+				feedPostPic3:[],
+
+feedPostPic4Data:'',
+				feedPostPic4:[],
+
+feedPostPic5Data:'',
+				feedPostPic5:[],
+
+
+                }//edata
+                ,
+                created(){
+                  this.sellerfeedpost = @Html.Raw(Json.Serialize(@ViewBag.sellerfeedpost));
+                     this.sellers = @Html.Raw(Json.Serialize(@ViewBag.sellers));
+this.select_seller = @Html.Raw(Json.Serialize(@ViewBag.select_seller));
+
+this.feedPostPic1Data ="/feedPostPic/"+this.sellerfeedpost.sellerfeedpostId+"feedPostPic1.png";
+this.feedPostPic2Data ="/feedPostPic/"+this.sellerfeedpost.sellerfeedpostId+"feedPostPic2.png";
+this.feedPostPic3Data ="/feedPostPic/"+this.sellerfeedpost.sellerfeedpostId+"feedPostPic3.png";
+this.feedPostPic4Data ="/feedPostPic/"+this.sellerfeedpost.sellerfeedpostId+"feedPostPic4.png";
+this.feedPostPic5Data ="/feedPostPic/"+this.sellerfeedpost.sellerfeedpostId+"feedPostPic5.png";
+
+                     
+                }//ecreated
+                ,
+                methods:{
+                  edit_sellerfeedpost(){
+                   									this.sellerfeedpost.sellerId = this.select_seller.sellerId;
+
+this.sellerfeedpost.feedPostPic1 = this.feedPostPic1Data;
+this.sellerfeedpost.feedPostPic2 = this.feedPostPic2Data;
+this.sellerfeedpost.feedPostPic3 = this.feedPostPic3Data;
+this.sellerfeedpost.feedPostPic4 = this.feedPostPic4Data;
+this.sellerfeedpost.feedPostPic5 = this.feedPostPic5Data;
+
+                    var url = '/sellerfeedpost/edit';
+                    var param= this.sellerfeedpost;
+                    $.post(url,param)
+                    .done(res =>{
+                          if(res.error == -1){
+                               window.location = '/sellerfeedpost/index';
+                          }
+                          else{
+                             alert(res.exception);
+                          }
+                    });
+                    
+                  }//ef
+                  ,                 
+                  preview_feedPostPic1(){
+ 						const reader = new FileReader();
+                		reader.readAsDataURL(this.feedPostPic1); //file1
+                		reader.onload = () => {
+                			this.feedPostPic1Data = reader.result; //imageData
+                		}//ev
+                		reader.onerror = function (error) {
+                			console.log('Error: ', error)
+                		}//ev
+
+                  }//ef    
+                  ,
+preview_feedPostPic2(){
+ 						const reader = new FileReader();
+                		reader.readAsDataURL(this.feedPostPic2); //file1
+                		reader.onload = () => {
+                			this.feedPostPic2Data = reader.result; //imageData
+                		}//ev
+                		reader.onerror = function (error) {
+                			console.log('Error: ', error)
+                		}//ev
+
+                  }//ef    
+                  ,
+preview_feedPostPic3(){
+ 						const reader = new FileReader();
+                		reader.readAsDataURL(this.feedPostPic3); //file1
+                		reader.onload = () => {
+                			this.feedPostPic3Data = reader.result; //imageData
+                		}//ev
+                		reader.onerror = function (error) {
+                			console.log('Error: ', error)
+                		}//ev
+
+                  }//ef    
+                  ,
+preview_feedPostPic4(){
+ 						const reader = new FileReader();
+                		reader.readAsDataURL(this.feedPostPic4); //file1
+                		reader.onload = () => {
+                			this.feedPostPic4Data = reader.result; //imageData
+                		}//ev
+                		reader.onerror = function (error) {
+                			console.log('Error: ', error)
+                		}//ev
+
+                  }//ef    
+                  ,
+preview_feedPostPic5(){
+ 						const reader = new FileReader();
+                		reader.readAsDataURL(this.feedPostPic5); //file1
+                		reader.onload = () => {
+                			this.feedPostPic5Data = reader.result; //imageData
+                		}//ev
+                		reader.onerror = function (error) {
+                			console.log('Error: ', error)
+                		}//ev
+
+                  }//ef    
+                  ,
+
+
+                }//emethod
+                ,
+                 computed:{
+                   
+
+                 }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

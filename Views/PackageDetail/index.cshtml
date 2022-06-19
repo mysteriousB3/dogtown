@@ -1,0 +1,117 @@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb breadcrumb-arrow">
+        <li class="breadcrumb-item active" aria-current="page">packageDetail</li>
+    </ol>
+</nav>
+<div id='app1' v-cloak>
+
+    <v-app>
+        <v-main>
+             <v-btn
+              class="white--text"
+              color="green darken-1"
+              @@click='add_packagedetail'
+             >
+                 <v-icon>
+                   mdi-plus
+                 </v-icon>
+                 
+             </v-btn>
+			<v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search"
+                    single-line
+                    hide-details
+                ></v-text-field>
+             <v-data-table
+			 :search = 'search'
+             :headers ='headers'
+             :items   ='packageDetails'
+             :footer-props="{ 'items-per-page-options': [25, 50,100] }"
+             :items-per-page="25"
+              class='elevation-1'
+             />
+                  <template v-slot:item.actions='{item}'>
+                        <v-btn small class="white--text mr-1"color="blue darken-1"
+                        @@click="edit_packagedetail(item)"
+                        >
+                            <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                        <v-btn small class="white--text"color="red darken-1"
+                        @@click="remove_packagedetail(item)"
+                        >
+                            <v-icon>mdi-trash-can</v-icon>
+                        </v-btn>
+                  </template>
+             </v-data-table>
+        </v-main>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                   search :'',
+                   packageDetails:[]
+                   ,
+                   headers:[
+                      {text:'packageDetail',value:'packageDetailId',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'ชื่อแพ็กเกจ',value:'packageDetailName',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'จำนวนโพสต์ของแพ็กเกจ',value:'totalPostOfPackage',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'ระยะเวลาของแต่ละโพส',value:'periodOfEachSellingPost',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'ระยะเวลาของแพ็กเก็จ',value:'totalPeriodOfPackage',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'ราคา',value:'price',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'actions',value:'actions',align:'left',sortable:true,class: 'white--text blue darken-2'}
+
+					]
+                }//edata
+                ,
+                created(){
+                  this.packageDetails = @Html.Raw(Json.Serialize(@ViewBag.packageDetails));
+                }//ecreated
+                ,
+                methods:{
+                    add_packagedetail(){
+                        window.location= '/packagedetail/add';
+                  
+                        
+                    }//ef
+                    ,
+                    edit_packagedetail(item){
+                        window.location = '/packagedetail/edit/'+item.packageDetailId;
+                    }
+                    ,
+                    remove_packagedetail(item){
+                          if (confirm("To proceed, please click OK")) {
+                              var id = item.packageDetailId;
+                              $.post( "/packagedetail/delete/"+item.packageDetailId)
+                              .done((res)=> {
+                                  if(res.error == -1){
+                                      this.packageDetails = this.packageDetails.filter(x=>x.packageDetailId != item.packageDetailId);
+                                  }//endif
+
+                              })
+                              .fail(function(res) {
+                                  alert( res.msg);
+                              });
+                          } //end if 
+                    }//ef
+
+                }//emethods
+                ,
+                computed:{
+
+                }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

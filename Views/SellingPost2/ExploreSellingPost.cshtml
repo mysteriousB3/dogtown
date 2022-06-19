@@ -1,0 +1,793 @@
+@using Microsoft.AspNetCore.Identity
+@using dog7.Data
+@inject SignInManager<AppUser> signInManager
+@inject UserManager<AppUser> userManager
+@inject dog7DbContext _context
+@using System.Linq
+<div id="app1">
+    <v-app>
+        <v-main>
+            @* picture part *@
+            <div style="border: solid black 1px; padding:10px; background-color:black;">
+                <v-row>
+                    <v-col cols="6">
+                        <v-img @@click="overlay1 = !overlay1" style="border-radius:30px; margin-left:12px;" height="600" width="600" :src="sellingPost.sellingPostPic1"></v-img>
+                        <v-overlay :z-index="zIndex" :value="overlay1">
+                            <v-carousel height="800px" width="800px" hide-delimiter-background cycle interval="10000" show-arrows-on-hover>
+                                <v-carousel-item v-for="pic in sellingPostPic" :src="pic.src" height="800px" width="800px">
+                                    <button @@click="overlay1 = false" style="position:absolute; right:5px;" class="btn-dark btn-lg">X</button>
+                                </v-carousel-item>
+                            </v-carousel>
+                        </v-overlay>
+                    </v-col>
+                    <v-col cols="6">
+                        <div>                           
+                                <v-card color="grey darken-4" class="white--text" style="padding: 20px;">
+                                    <v-row>
+                                        <button class="btn-lg btn-block btn-light" @@click=exploreShop
+                                            style="font-size: 2rem; font-weight:900;">{{seller.farmName}}
+                                            <v-tooltip top v-if="seller.farmRegister==1"><template v-slot:activator="{ on, attrs }"><v-btn  class="iconBtn marked" icon color="blue" ><v-icon v-on="on"large>mdi-star-circle</v-icon></v-btn></template>ผู้ขายมีใบจดทะเบียนฟาร์ม</v-tooltip>
+                                            </button>
+                                    </v-row>
+                                    <br><br>
+                                    <v-row>
+                                        <v-col cols="4">
+                                            <v-img height="200" width="200" :src="sellerProfilePic_Data"></v-img>
+                                        </v-col>
+                                        <v-col>
+                                            <v-row>
+                                                <span class="h5">{{seller.sellerProfileDescription}}</span>
+                                            </v-row>
+                                            <v-row>
+                                                <span class="h5"> เลขที่ {{seller.number}} หมู่ {{seller.moo}}
+                                                    ซอย{{seller.soi}}</span>
+                                            </v-row>
+                                            <v-row>
+                                                <span class="h5"> ตำบล {{seller.tambon}} อำเภอ {{seller.amphoe}}</span>
+                                            </v-row>
+                                            <v-row>
+                                                <span class="h5">ถนน{{seller.street}} จังหวัด{{seller.province}}</span>
+                                            </v-row>
+                                            <v-row>
+                                                <span class="h5">รหัสไปรษณีย์ {{seller.postNumber}}</span>
+                                            </v-row>
+                                            <v-row>
+                                                <span class="h5">เบอร์โทร {{seller.sellerProfilePhoneNumber}}</span>
+                                            </v-row>
+                                            <v-row> ยอดเข้าชมโปรไฟล์ทั้งหมด {{seller.profileView}}</v-row>
+                                        </v-col>
+                                    </v-row>
+                                </v-card>
+                        </div>
+                        <br>
+                        <v-card style="padding:10px;" color="grey darken-4">
+                            <v-row>
+                                <v-col cols="12">
+                                @if (signInManager.IsSignedIn(User)){
+                                
+                                var user = userManager.GetUserAsync(User).Result;
+                                var sellerId = (Json.Serialize(@ViewBag.theId)).ToString();                                
+                                if(user.isSeller == int.Parse(sellerId)){
+                                    <v-col cols="12">
+                                        <span class="red--text h6">หมดอายุ {{sellingPostPostExpiredDateDateTime[0]}}</span>
+                                        <button @@click="deleteSellingPost" style="margin-left: 50px;" class="btn btn-danger danger">ลบ</button><br><br>
+                                        <button @@click="overlay2 = !overlay2" class="btn btn-primary white--text btn-block">แก้ไขโพสต์</button>
+                                    </v-col>
+                                    <v-overlay :z-index="zIndex" :value="overlay2">
+                                            <v-responsive class="overflow-y-auto" height="500px" width="900px" style="float:left;">
+                                                <v-card>
+                                                    <v-card-text>
+                                                        <div style="margin:20px">
+                                                            <v-select return-object outlined v-model="select_gender"
+                                                    :items="genders" item-text='value' menu-props="auto"
+                                                    label="ชื่อสายพันธ์ุ" show="genderName">
+                                                            </v-select>
+                                                        </div>
+
+                                                        <div style="margin:20px">
+                                                            <v-select return-object outlined v-model="select_breed" :items="breeds"
+                                                    item-text='value' menu-props="auto" label="เพศ"
+                                                    show="breedNameEng&breedNameThai"></v-select>
+                                                        </div>
+                                                        <div style="margin:20px">
+                                                            <span id="nameCheck" class="red--text"></span>
+                                                            <v-text-field v-model="sellingPost.sellingPostName" label="หัวข้อโพสต์">
+                                                            </v-text-field>
+                                                        </div>
+                                                        <div style="margin:20px">
+                                                            <span id="priceCheck" class="red--text"></span>
+                                                            <v-text-field type="number" v-model="sellingPost.price" label="ราคา">
+                                                            </v-text-field>
+                                                        </div>
+                                                        <div style="margin:20px">
+                                                            <span id="desCheck" class="red--text"></span>
+                                                            <v-textarea v-model="sellingPost.sellingPostDescription"
+                                                    label="คำอธิบายเพิ่มเติม"></v-textarea>
+                                                        </div>
+                                                        
+                                                        <div style="margin:20px">
+                                                            <span id="birthCheck" class="red--text"></span>
+                                                            <span class="h6">กรุณาเลือกวันเกิดของลูกสุนัข</span><br>
+                                                            <v-date-picker v-model="sellingPost.dateOfBirth" class="mt-4 grey">
+                                                            </v-date-picker><br>
+                                                        </div><br>
+                                                        <div style="margin:20px">
+                                                            <span id="pedCheck" class="red--text"></span>
+                                                            <span
+                                                    class="h6">สามารถออกใบเพ็ดดีกรีให้ลูกสุนัขตัวนี้ได้หรือไม่</span><br>
+                                                            <template>
+                                                                <v-container class="px-0" fluid>
+                                                                    <v-radio-group v-model="sellingPost.pedegree">
+                                                                        <v-radio value="1" label="ออกให้ได้"></v-radio>
+                                                                        <v-radio value="2" label="ออกให้ไม่ได้"></v-radio>
+                                                                    </v-radio-group>
+                                                                </v-container>
+                                                            </template>
+                                                        </div>
+                                                        <div style="margin:20px">
+                                                            <span id="imgCheck" class="red--text"></span>
+                                                            <span class="h6">กรุณาอัพโหลดรูปภาพ ขั้นต่ำ 1 รูปภาพ</span>
+                                                        </div>
+                                                        <v-col cols="3">
+                                                            <v-card>
+                                                                <v-card-text>
+                                                                    <v-img :src="sellingPostPic1Data"></v-img>
+                                                                </v-card-text>
+                                                                <v-card-actions>
+                                                                    <v-file-input label="รูปที่1" v-model="sellingPostPic1"
+                                                            @@change="preview_sellingPostPic1"></v-file-input>
+                                                                </v-card-actions>
+                                                            </v-card>
+
+                                                        </v-col>
+
+
+                                                        <v-col cols="3">
+                                                            <v-card>
+                                                                <v-card-text>
+                                                                    <v-img :src="sellingPostPic2Data"></v-img>
+                                                                </v-card-text>
+                                                                <v-card-actions>
+                                                                    <v-file-input label="รูปที่2" v-model="sellingPostPic2"
+                                                            @@change="preview_sellingPostPic2"></v-file-input>
+                                                                </v-card-actions>
+                                                            </v-card>
+
+                                                        </v-col>
+
+
+                                                        <v-col cols="3">
+                                                            <v-card>
+                                                                <v-card-text>
+                                                                    <v-img :src="sellingPostPic3Data"></v-img>
+                                                                </v-card-text>
+                                                                <v-card-actions>
+                                                                    <v-file-input label="รูปที่3" v-model="sellingPostPic3"
+                                                            @@change="preview_sellingPostPic3"></v-file-input>
+                                                                </v-card-actions>
+                                                            </v-card>
+
+                                                        </v-col>
+
+
+                                                        <v-col cols="3">
+                                                            <v-card>
+                                                                <v-card-text>
+                                                                    <v-img :src="sellingPostPic4Data"></v-img>
+                                                                </v-card-text>
+                                                                <v-card-actions>
+                                                                    <v-file-input label="รูปที่4" v-model="sellingPostPic4"
+                                                            @@change="preview_sellingPostPic4"></v-file-input>
+                                                                </v-card-actions>
+                                                            </v-card>
+                                                        </v-col>
+
+                                                        <v-col cols="3">
+                                                            <v-card>
+                                                                <v-card-text>
+                                                                    <v-img :src="sellingPostPic5Data"></v-img>
+                                                                </v-card-text>
+                                                                <v-card-actions>
+                                                                    <v-file-input label="รูปที่5" v-model="sellingPostPic5"
+                                                            @@change="preview_sellingPostPic5"></v-file-input>
+                                                                </v-card-actions>
+                                                            </v-card>
+                                                        </v-col>
+                                                        <v-btn @@click="overlay2 = false">ยกเลิก</v-btn>
+                                                        <v-btn @@click="editSellingPost">แก้ไข</v-btn>
+                                                    </v-card-text>
+                                                </v-card>
+                                            </v-responsive>
+                                        </v-overlay>
+                                }//econ
+                            } 
+                            </v-row>
+                            <table>
+                                <tr class="white--text h4">
+                                    <td><span class="grey--text h6">หัวข้อ</span></td>
+                                    <td style="padding: 0 10px; font-size:1.3rem;"><span>{{sellingPost.sellingPostName}}</span></td>
+                                </tr>
+                                <tr class="white--text h4">
+                                    <td><span class="grey--text h6">พันธ์ุ</span></td>
+                                    <td style="padding: 0 10px; font-size:1.3rem;"><span>{{sellingPost.breedNameThai}}</span></td>
+                                </tr>
+                                <tr class="white--text h4">
+                                    <td><span class="grey--text h6">เพศ</span></td>
+                                    <td style="padding: 0 10px; font-size:1.3rem;"><span>{{sellingPost.genderName}}</span></td>
+                                </tr>
+                                <tr class="white--text h4">
+                                    <td><span class="grey--text h6">เมื่อวันที่</span></td>
+                                    <td style="padding:0 10px; font-size:1.3rem;"><span>{{sellingPostPostingDateTime}}</span></td>
+                                </tr>
+                                <tr class="white--text h4">
+                                    <td><span class="grey--text h6">เปลี่ยนรูปภาพครั้งล่าสุด</span></td>
+                                    <td style="padding:0 10px; font-size:1.3rem;"><span>{{sellingPostPicUpdateDateTime}}</span></td>
+                                </tr>
+                                <tr class="white--text h4">
+                                    <td><span class="grey--text h6">สุนัขเกิดวันที่</span></td>
+                                    <td style="padding:0 10px; font-size:1.3rem;"><span>{{dateOfBirth}}</span></td>
+                                </tr>
+                                <tr class="white--text h4">
+                                    <td><span class="grey--text h6">สามารถออกใบเพ็ดดีกรี</span></td>
+                                    <td style="padding:0 10px; font-size:1.3rem;"><span>{{pedegree}}</span></td>
+                                </tr>
+                                <tr class="white--text h4">
+                                    <td><span class="grey--text h6">ข้อมูลเพิ่มเติม:</span></td>
+                                    
+                                </tr>
+                                <tr class="white--text h4">
+                                    <td colspan="2" style="padding:0 10px; font-size:1.3rem;"><span>{{sellingPost.sellingPostDescription}}</span></td>
+                                </tr>
+                            </table>
+                        </v-card>
+
+
+                    </v-col>
+                </v-row>
+                <v-row>
+                    <v-col cols="12">
+                        <v-img  @@click="overlay1 = !overlay1"  style="float: left; margin:12px; border-radius:50px;" height="300" width="300"
+                            :src="sellingPost.sellingPostPic2"></v-img>
+                        <v-img  @@click="overlay1 = !overlay1" style="float: left; margin:12px; border-radius:50px;" height="300" width="300"
+                            :src="sellingPost.sellingPostPic3"></v-img>
+                        <v-img  @@click="overlay1 = !overlay1" style="float: left; margin:12px; border-radius:50px;" height="300" width="300"
+                            :src="sellingPost.sellingPostPic4"></v-img>
+                        <v-img  @@click="overlay1 = !overlay1" style="float: left; margin:12px; border-radius:50px;" height="300" width="300"
+                            :src="sellingPost.sellingPostPic5"></v-img>
+                    </v-col>
+                </v-row>
+                <v-row class="grey--text" style="margin-left: 12px;">
+                    <span>จำนวนคนกดไลค์ทั้งหมด: {{sellingPost.postLike}}</span>
+                    <span style="margin-left: 5px;">จำนวนผู้เข้าชมทั้งหมด: {{sellingPost.view}}</span>
+                </v-row>
+                <br>
+                @* like part if log in *@
+                <div id="likePart">
+                    @if (signInManager.IsSignedIn(User)){
+                        var user = userManager.GetUserAsync(User).Result;
+                        var sellingPostFeedback2 = _context.SellingPostFeedback.Where(x=>x.userId == user.Id).ToList();
+                        
+                            <v-row v-if="likeOrNot==1">
+                                <v-btn 
+                                class="btn-block blue accent-3"
+                                @@click="disLike(@user.Id)"
+                                >
+                                    <v-icon style="font-size:2.3rem">
+                                    mdi-thumb-up
+                                    </v-icon>
+                                </v-btn>
+                            </v-row>
+                        
+                            <v-row v-if="likeOrNot==0">
+                                <v-btn 
+                                class="btn-block white active accent-3"
+                                @@click="like(@user.Id)"
+                                >
+                                    <v-icon style="font-size:2.3rem">
+                                    mdi-thumb-up
+                                    </v-icon>
+                                </v-btn>
+                            </v-row>
+                                           
+                    }
+                    @if (!signInManager.IsSignedIn(User)){
+                        var user = userManager.GetUserAsync(User).Result;
+                        <v-row>
+                            <v-btn
+                            class="btn-block light-blue accent-3"
+                            >
+                                <v-icon style="font-size:2.3rem">
+                                mdi-thumb-up
+                                </v-icon>
+                                
+                            </v-btn>
+                        </v-row>
+                    }
+                </div>
+            </div>
+        </v-main>
+    </v-app>
+
+</div>
+@section Scripts{
+<script>
+    var component = {
+        vuetify: new Vuetify(theme())
+        ,
+        el: "#app1"
+        ,
+        data: {
+            //like part
+            likeOrNot:0,
+            //overlay part
+            overlay1:false,
+            overlay2:false,
+            zIndex:1,
+            //sellingPost part
+            genders: [],
+            select_gender: {},
+            breeds: [],
+            select_breed: {},
+            pedegree:"",
+            thePed:1,
+
+
+            test: 1,
+            sellingPost: {},
+            sellingPostPostExpiredDateDateTime:[],
+
+            //time part
+            sellingPostPostingDateTime: "",
+            dateOfBirth: "",
+            sellingPostPicUpdateDateTime: "",
+
+            seller: {}
+            ,
+            
+            //picture part
+            sellingPostPic:[],
+            overlay1: false,
+            zIndex:1,
+
+            //picture part
+            sellingPostPic1Data: '',
+            sellingPostPic1: [],
+
+            sellingPostPic2Data: '',
+            sellingPostPic2: [],
+
+            sellingPostPic3Data: '',
+            sellingPostPic3: [],
+
+            sellingPostPic4Data: '',
+            sellingPostPic4: [],
+
+            sellingPostPic5Data: '',
+            sellingPostPic5: [],
+            
+        }//edata
+        ,
+        methods: {
+            like(userId){
+                param={userId:userId,sellingPostId:this.sellingPost.sellingPostId}
+                $.post("/SellingPost2/Like",param).done(res =>{
+                    if(res.error==-1){
+                        this.likeOrNot=1;
+                        this.sellingPost.postLike = res.newLike
+                    }
+                    else{
+                        alert(res.exception);
+                    }
+                })
+            },
+            disLike(userId){
+                param={userId:userId,sellingPostId:this.sellingPost.sellingPostId}
+                $.post("/SellingPost2/DisLike",param).done(res =>{
+                    if(res.error==-1){
+                        this.likeOrNot=0;
+                        this.sellingPost.postLike = res.newLike
+                    }
+                    else{
+                        alert(res.exception);
+                    }
+                })
+            }
+            ,
+            exploreShop() {
+                location = "/Seller2/MyShop/" + this.seller.sellerId;
+            }//ef
+            ,
+            editSellingPost(){
+                this.sellingPost.genderId = this.select_gender.genderId;
+                this.sellingPost.breedId = this.select_breed.breedId;
+                //check whether there is change in picture or not
+                if(this.sellingPost.sellingPostPic1 != this.sellingPostPic1Data ||this.sellingPost.sellingPostPic2 !=this.sellingPostPic2Data ||this.sellingPost.sellingPostPic5!=this.sellingPostPic5Data ||this.sellingPost.sellingPostPic3!=this.sellingPostPic3Data ||this.sellingPost.sellingPostPic4!=this.sellingPostPic4Data){
+                    this.sellingPost.sellingPostPicUpdateDateTime = "0001-01-01"
+                }//econ
+                this.sellingPost.sellingPostPic1 = this.sellingPostPic1Data;
+                this.sellingPost.sellingPostPic2 = this.sellingPostPic2Data;
+                this.sellingPost.sellingPostPic3 = this.sellingPostPic3Data;
+                this.sellingPost.sellingPostPic4 = this.sellingPostPic4Data;
+                this.sellingPost.sellingPostPic5 = this.sellingPostPic5Data;
+                this.sellingPost.sellerId = this.seller.sellerId;
+                //check completeness
+                var p1=0;
+                var p2=0;
+                var p3=0;
+                var p4=0;
+                var p5=0;
+                var p6=0;
+                //check selling post name
+                if(this.sellingPost.sellingPostName == ""){
+                    document.getElementById("nameCheck").innerHTML =""
+                    document.getElementById("nameCheck").innerHTML ="กรุณาใส่หัวข้อ"
+                    p1=0;
+                }
+                else if(this.sellingPost.sellingPostName != ""){
+                    document.getElementById("nameCheck").innerHTML =""
+                    p1=1;
+                }
+
+                //check price
+                if(this.sellingPost.price <= 0){
+                    document.getElementById("priceCheck").innerHTML =""
+                    document.getElementById("priceCheck").innerHTML ="กรุณาใส่ราคา"
+                    p2=0;
+                }
+                else if(this.sellingPost.price >0 ){
+                    document.getElementById("priceCheck").innerHTML =""
+                    p2=1;
+                }
+
+                //check description
+                if(this.sellingPost.sellingPostDescription == ""){
+                    document.getElementById("desCheck").innerHTML =""
+                    document.getElementById("desCheck").innerHTML ="กรุณาใส่คำอธิบาย"
+                    p3=0;
+                }
+                else if(this.sellingPost.sellingPostDescription != "" ){
+                    document.getElementById("desCheck").innerHTML =""
+                    p3=1;
+                }
+
+                //check birth day date
+                if(this.sellingPost.dateOfBirth == ""){
+                    document.getElementById("birthCheck").innerHTML =""
+                    document.getElementById("birthCheck").innerHTML ="กรุณาใส่วันเกิดลูกสุนัข"
+                    p4=0;
+                }
+                else if(this.sellingPost.dateOfBirth != "" ){
+                    document.getElementById("birthCheck").innerHTML =""
+                    p4=1;
+                }
+
+                //check birth day date
+                if(this.sellingPost.pedegree == 0){
+                    document.getElementById("pedCheck").innerHTML =""
+                    document.getElementById("pedCheck").innerHTML ="กรุณาระบุเกี่ยวกับการออกใบเพ็ดดีกรี"
+                    p5=0;
+                }
+                else if(this.sellingPost.pedegree != 0 ){
+                    document.getElementById("pedCheck").innerHTML =""
+                    p5=1;
+                }
+
+                //check birth day date
+                if(this.sellingPost.sellingPostPic1 == ""){
+                    document.getElementById("imgCheck").innerHTML =""
+                    document.getElementById("imgCheck").innerHTML ="กรุณาระบุเกี่ยวกับการออกใบเพ็ดดีกรี"
+                    p6=0;
+                }
+                else if(this.sellingPost.sellingPostPic1 != "" ){
+                    document.getElementById("imgCheck").innerHTML =""
+                    p6=1;
+                }
+                if(p1 == 0 ||p2 == 0 ||p3 == 0 ||p4 == 0 ||p5 == 0 ||p6 == 0){
+                    return;
+                }
+                var param = {sellingPostId:this.sellingPost.sellingPostId,genderId:this.sellingPost.genderId,breedId:this.sellingPost.breedId,sellerId:this.sellingPost.sellerId,price:this.sellingPost.price,sellingPostName:this.sellingPost.sellingPostName,sellingPostDescription:this.sellingPost.sellingPostDescription,dateOfBirth:this.sellingPost.dateOfBirth,pedegree:this.sellingPost.pedegree,sellingPostPostingDateTime:this.sellingPost.sellingPostPostingDateTime,sellingPostPostExpiredDate:this.sellingPost.sellingPostPostExpiredDate,postLike:this.sellingPost.postLike,view:this.sellingPost.view,sellingPostPic1:this.sellingPost.sellingPostPic1,sellingPostPic2:this.sellingPost.sellingPostPic2,sellingPostPic3:this.sellingPost.sellingPostPic3,sellingPostPic4:this.sellingPost.sellingPostPic4,sellingPostPic5:this.sellingPost.sellingPostPic5,sellingPostPicUpdateDateTime:this.sellingPost.sellingPostPicUpdateDateTime}               
+                var url = '/sellingPost2/Edit';
+                $.post(url, param).done(res => {
+                    if (res.error == 1) {
+                        console.log(res.exception);
+                        alert(res.message);
+                    }//econ
+                    else {
+                        //have to change the view here !!!!!!!!!11
+                        alert("แก้ไขโพสต์เรียบร้อย")
+                        location = "/SellingPost2/ExploreSellingPost/"+ this.sellingPost.sellingPostId;
+                    }//econ
+                })//epost
+            }//ef
+            ,
+            preview_sellingPostPic1() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.sellingPostPic1); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.sellingPostPic1Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef 
+            ,
+            preview_sellingPostPic2() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.sellingPostPic2); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.sellingPostPic2Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef 
+            ,
+            preview_sellingPostPic3() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.sellingPostPic3); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.sellingPostPic3Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef 
+            ,
+            preview_sellingPostPic4() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.sellingPostPic4); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.sellingPostPic4Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef 
+            ,
+            preview_sellingPostPic5() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.sellingPostPic5); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.sellingPostPic5Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef
+            ,
+            deleteSellingPost(){
+                if(confirm("กดปุ่มเพื่อยืนยัน")==true){
+                    $.post("/SellingPost2/Delete",this.sellingPost).done(res=>{
+                        if(res.error==-1){
+                            alert("ลบโพสต์เรียบร้อยแล้ว")
+                            location ="/Seller2/MyShop/"+this.sellingPost.sellerId;
+                        }//econ
+                        else{
+                            alert(res.exception);
+                        }
+                    })//epost
+                }//econ
+            }//ef
+        }//emethods
+        ,
+        created() {
+            this.likeOrNot = @Html.Raw(Json.Serialize(@ViewBag.likeOrNot));
+            if(this.likeOrNot == null){
+                this.likeOrNot=0;
+            }//econ
+            //selling post part
+            var getSellingPostData = @Html.Raw(Json.Serialize(@ViewBag.sellingPost3));
+            this.sellingPost = getSellingPostData[0];
+            if(this.sellingPost.pedegree == 1){
+                this.pedegree ="ได้"
+            }
+            else if(this.sellingPost.pedegree != 1){
+                this.pedegree ="ไม่ได้"
+            }
+            //split the time from dateOfBirth coulumn so that it can fit with the vuetify
+            this.sellingPost.dateOfBirth = this.sellingPost.dateOfBirth.split("T")[0];
+            
+            //decrorate month and price of selling post
+            var nameOfMonth = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤษจิกายน', 'ธันวาคม'];
+            //posting part
+            var date = this.sellingPost.sellingPostPostingDateTime.slice(8, 10);
+            var month = this.sellingPost.sellingPostPostingDateTime.slice(5, 7);
+            var monthName = nameOfMonth[parseInt(month) - 1]
+            var year = parseInt(this.sellingPost.sellingPostPostingDateTime.slice(0, 4)) + 543;
+            var time = this.sellingPost.sellingPostPostingDateTime.slice(11, 16);
+            this.sellingPostPostingDateTime = date + " " + monthName + " " + year;
+
+            //date and time for expired
+            var date = this.sellingPost.sellingPostPostExpiredDate.slice(8, 10);
+            var month = this.sellingPost.sellingPostPostExpiredDate.slice(5, 7);
+            var monthName = nameOfMonth[parseInt(month) - 1]
+            var year = parseInt(this.sellingPost.sellingPostPostExpiredDate.slice(0, 4)) + 543;
+            var time = this.sellingPost.sellingPostPostExpiredDate.slice(11, 16);
+            var o = { date, month, monthName, year, time }
+            var sentence = date +" " + monthName +" "+ year;
+            this.sellingPostPostExpiredDateDateTime.push(sentence);
+
+            //update picture part
+            var date = this.sellingPost.sellingPostPicUpdateDateTime.slice(8, 10);
+            var month = this.sellingPost.sellingPostPicUpdateDateTime.slice(5, 7);
+            var monthName = nameOfMonth[parseInt(month) - 1]
+            var year = parseInt(this.sellingPost.sellingPostPicUpdateDateTime.slice(0, 4)) + 543;
+            var time = this.sellingPost.sellingPostPicUpdateDateTime.slice(11, 16);
+            this.sellingPostPicUpdateDateTime = date + " " + monthName + " " + year;
+
+            //birthday
+            date = this.sellingPost.dateOfBirth.slice(8, 10);
+            month = this.sellingPost.dateOfBirth.slice(5, 7);
+            monthName = nameOfMonth[parseInt(month) - 1]
+            year = parseInt(this.sellingPost.dateOfBirth.slice(0, 4)) + 543;
+            time = this.sellingPost.dateOfBirth.slice(11, 16);
+            this.dateOfBirth = date + " " + monthName + " " + year;
+
+
+
+            //seller part
+            var seller = @Html.Raw(Json.Serialize(@ViewBag.seller))
+                this.seller = seller[0]
+            this.sellerProfilePic_Data = "/sellerProfilePic/" + this.seller.sellerId + "sellerProfilePic.png"
+            
+
+            //picture part
+            this.sellingPostPic=[{src:this.sellingPost.sellingPostPic1},{src:this.sellingPost.sellingPostPic2},{src:this.sellingPost.sellingPostPic3},{src:this.sellingPost.sellingPostPic4},{src:this.sellingPost.sellingPostPic5}]
+            
+            //=== begin gender ===
+            this.genders = @Html.Raw(Json.Serialize(@ViewBag.genders));
+            for(var i of this.genders){
+                if(i.genderId == this.sellingPost.genderId){
+                    this.select_gender = i
+                }//econ
+            }//eloop
+            //=== begin gender ===
+                     
+
+            //=== begin breed ===
+            this.breeds = @Html.Raw(Json.Serialize(@ViewBag.breeds));
+            for(var i of this.breeds){
+                if(i.breedId == this.sellingPost.breedId){
+                    this.select_breed = i
+                }//econ
+            }//eloop
+            //=== begin breed ===
+            
+            //assign picture part for edit
+            this.sellingPostPic1Data = this.sellingPost.sellingPostPic1;
+            this.sellingPostPic2Data = this.sellingPost.sellingPostPic2;
+            this.sellingPostPic3Data = this.sellingPost.sellingPostPic3;
+            this.sellingPostPic4Data = this.sellingPost.sellingPostPic4;
+            this.sellingPostPic5Data = this.sellingPost.sellingPostPic5;
+
+        }//ecreated
+
+    }//ecomponent
+    var app = new Vue(component);
+</script>
+}

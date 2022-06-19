@@ -1,0 +1,1226 @@
+@using Microsoft.AspNetCore.Identity
+@using dog7.Data
+@inject SignInManager<AppUser> signInManager
+@inject UserManager<AppUser> userManager
+@inject dog7DbContext _context
+@using System.Linq
+<div id="app1">
+    <v-app>
+        <v-main>
+            <div style="margin: 20px;">
+                <v-row>
+                    @* Shop or seller profile part *@
+                    <v-col cols="9">
+                        <v-card color="grey darken-4" class="white--text" style="padding: 20px;">
+                            <v-row>
+                                <button class="btn-lg btn-block btn-light"
+                                    style="font-size: 2rem; font-weight:900;">{{seller.farmName}}
+                                    <v-tooltip top v-if="seller.farmRegister==1"><template v-slot:activator="{ on, attrs }"><v-btn  class="iconBtn marked" icon color="blue" ><v-icon v-on="on"large>mdi-star-circle</v-icon></v-btn></template>ผู้ขายมีใบจดทะเบียนฟาร์ม</v-tooltip>
+                                    </button>
+                            </v-row>
+                            <br><br>
+                            <v-row>
+                                <v-col cols="4">
+                                    <v-img height="200" width="200" :src="sellerProfilePic_Data"></v-img>
+                                </v-col>
+                                <v-col>
+                                    <v-row>
+                                        <span class="h5">{{seller.sellerProfileDescription}}</span>
+                                    </v-row>
+                                    <v-row>
+                                        <span class="h5"> เลขที่ {{seller.number}} หมู่ {{seller.moo}}
+                                            ซอย {{seller.soi}}</span>
+                                    </v-row>
+                                    <v-row>
+                                        <span class="h5"> ตำบล {{seller.tambon}} อำเภอ {{seller.amphoe}}</span>
+                                    </v-row>
+                                    <v-row>
+                                        <span class="h5">ถนน{{seller.street}} จังหวัด{{seller.province}}</span>
+                                    </v-row>
+                                    <v-row>
+                                        <span class="h5">รหัสไปรษณีย์ {{seller.postNumber}}</span>
+                                    </v-row>
+                                    <v-row>
+                                        <span class="h5">เบอร์โทร {{seller.sellerProfilePhoneNumber}}</span>
+                                    </v-row>
+                                    <v-row class="grey--text"> ยอดเข้าชมโปรไฟล์ทั้งหมด {{seller.profileView}} จำนวนโพสต์ทั้งหมดตั้งแต่เปิดร้าน
+                                        {{seller.totalPost}}
+                                    </v-row>
+                                    <v-row class="grey--text">ยอดเข้าชมโพสต์ทุกโพสต์ {{seller.totalPostView}}
+                                    </v-row>
+                                </v-col>
+                                <v-col cols="2">
+                                    @if (signInManager.IsSignedIn(User)){
+                                    
+                                    var user = userManager.GetUserAsync(User).Result;
+                                    var sellerId = (Json.Serialize(@ViewBag.theId)).ToString();                                
+                                    if(user.isSeller == int.Parse(sellerId)){
+                                        var theHref = "/Seller2/EditSellerProfile/"+ int.Parse(sellerId);
+                                        <v-col cols="1">
+                                            <a href= @theHref class="btn btn-primary white--text">แก้ไข</a>
+                                        </v-col>
+                                    }//econ
+                                }   
+                                </v-col>
+                            </v-row>
+                        </v-card>
+                    </v-col>
+                    <v-col cols="3">
+                        <v-card color="blue" style="padding: 10px;">
+                            <div class="h3"  style="font-weight: 700; color:#CFD8DC; text-align:center;">รีวิวจากผู้ใช้</div>
+                            <v-card-text style="color:#CFD8DC;">
+                                <span class="h6" >รีวิวทั้งหมด ({{totalReview}})</span>
+                                <span class="h6" style="margin-left: 40px;">* * * * * ({{total5Review}})</span>
+                                <div style="text-align: center; margin-top:10px;">
+                                    <button class="btn btn-success" @@click="reviewSeller()">ดูรีวิว</button>
+                                </div>
+                            </v-card-text>
+                        </v-card>
+                    </v-col> 
+                </v-row>               
+            </div>
+            <ul class="nav nav-tabs nav-justified">
+                <li class="nav-item">
+                    <a class="nav-link" @@click.prevent="setActive('sellingPost')"
+                        :class="{ active: isActive('sellingPost') }" href="#sellingPost">โพสต์ประกาศขาย</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" @@click.prevent="setActive('sellerFeedPost')" :class="{ active: isActive('sellerFeedPost') }"
+                        href="#sellerFeedPost">โพสต์ประจำวัน</a>
+                </li>
+            </ul>
+            @* content *@
+            <div class="tab-content py-3" id="myTabContent">
+                @* content of selling post *@
+                <div class="tab-pane fade" :class="{ 'active show': isActive('sellingPost') }" id="sellingPost">
+                    <v-container>
+                        @* check to log in for posting selling post *@
+                        @if (signInManager.IsSignedIn(User))
+                        {
+                            //get user
+                            var user = userManager.GetUserAsync(User).Result;
+                            @if (user.isSeller > 0)
+                            {
+                                //get seller and seller package
+                                
+                                var seller = _context.Seller.Where(x => x.sellerId == user.isSeller).ToList()[0];
+                                var sellerId = (Json.Serialize(@ViewBag.theId)).ToString(); 
+                                sellerId = int.Parse(sellerId);
+                                @* var sellerPackage = _context.SellerPackage.Where(x => x.sellerId == sellerId && x.packageStatus == 1).ToList()[0]; *@
+                                @if (user.isSeller == sellerId)
+                                {
+                                    <v-card>
+                                        <v-btn class="btn btn-success success btn-block" @@click="overlay1 = !overlay1">
+                                            <span class="h4">โพสต์ขายลูกสุนัข !</span>
+                                        </v-btn>
+                                        <v-overlay :z-index="zIndex" :value="overlay1">
+                                            <v-responsive class="overflow-y-auto" height="500px" width="900px" style="float:left;">
+                                                <v-card>
+                                                    <v-card-text>
+                                                        <div style="margin:20px">
+                                                            <v-select return-object outlined v-model="select_gender"
+                                                    :items="genders" item-text='value' menu-props="auto"
+                                                    label="เพศ" show="genderName">
+                                                            </v-select>
+                                                        </div>
+
+                                                        <div style="margin:20px">
+                                                            <v-select return-object outlined v-model="select_breed" :items="breeds"
+                                                    item-text='value' menu-props="auto" label="ชื่อสายพันธุ์"
+                                                    show="breedNameEng&breedNameThai"></v-select>
+                                                        </div>
+                                                        <div style="margin:20px">
+                                                            <span id="nameCheck" class="red--text"></span>
+                                                            <v-text-field v-model="sellingPost.sellingPostName" label="หัวข้อโพสต์">
+                                                            </v-text-field>
+                                                        </div>
+                                                        <div style="margin:20px">
+                                                            <span id="priceCheck" class="red--text"></span>
+                                                            <v-text-field type="number" v-model="sellingPost.price" label="ราคา">
+                                                            </v-text-field>
+                                                        </div>
+                                                        <div style="margin:20px">
+                                                            <span id="desCheck" class="red--text"></span>
+                                                            <v-textarea v-model="sellingPost.sellingPostDescription"
+                                                    label="คำอธิบายเพิ่มเติม"></v-textarea>
+                                                        </div>
+                                                        
+                                                        <div style="margin:20px">
+                                                            <span id="birthCheck" class="red--text"></span>
+                                                            <span class="h6">กรุณาเลือกวันเกิดของลูกสุนัข</span><br>
+                                                            <v-date-picker v-model="sellingPost.dateOfBirth" class="mt-4 grey">
+                                                            </v-date-picker><br>
+                                                        </div><br>
+                                                        <div style="margin:20px">
+                                                            <span id="pedCheck" class="red--text"></span>
+                                                            <span
+                                                    class="h6">สามารถออกใบเพ็ดดีกรีให้ลูกสุนัขตัวนี้ได้หรือไม่</span><br>
+                                                            <v-radio-group v-model="sellingPost.pedegree">
+                                                                <v-radio value="1">
+                                                                    <template v-slot:label>
+                                                                        <strong class="dark--text">ออกให้ได้</strong>
+                                                                    </template>
+                                                                </v-radio>
+                                                                <v-radio value="2">
+                                                                    <template v-slot:label>
+                                                                        <strong class="dark--text">ออกให้ไม่ได้</strong>
+                                                                    </template>
+                                                                </v-radio>
+                                                            </v-radio-group>
+                                                        </div>
+                                                        <div style="margin:20px">
+                                                            <span id="imgCheck" class="red--text"></span>
+                                                            <span class="h6">กรุณาอัพโหลดรูปภาพ ขั้นต่ำ 1 รูปภาพ</span>
+                                                        </div>
+                                                        <v-col cols="3">
+                                                            <v-card>
+                                                                <v-card-text>
+                                                                    <v-img :src="sellingPostPic1Data"></v-img>
+                                                                </v-card-text>
+                                                                <v-card-actions>
+                                                                    <v-file-input label="รูปที่1" v-model="sellingPostPic1"
+                                                            @@change="preview_sellingPostPic1"></v-file-input>
+                                                                </v-card-actions>
+                                                            </v-card>
+
+                                                        </v-col>
+
+
+                                                        <v-col cols="3">
+                                                            <v-card>
+                                                                <v-card-text>
+                                                                    <v-img :src="sellingPostPic2Data"></v-img>
+                                                                </v-card-text>
+                                                                <v-card-actions>
+                                                                    <v-file-input label="รูปที่2" v-model="sellingPostPic2"
+                                                            @@change="preview_sellingPostPic2"></v-file-input>
+                                                                </v-card-actions>
+                                                            </v-card>
+
+                                                        </v-col>
+
+
+                                                        <v-col cols="3">
+                                                            <v-card>
+                                                                <v-card-text>
+                                                                    <v-img :src="sellingPostPic3Data"></v-img>
+                                                                </v-card-text>
+                                                                <v-card-actions>
+                                                                    <v-file-input label="รูปที่3" v-model="sellingPostPic3"
+                                                            @@change="preview_sellingPostPic3"></v-file-input>
+                                                                </v-card-actions>
+                                                            </v-card>
+
+                                                        </v-col>
+
+
+                                                        <v-col cols="3">
+                                                            <v-card>
+                                                                <v-card-text>
+                                                                    <v-img :src="sellingPostPic4Data"></v-img>
+                                                                </v-card-text>
+                                                                <v-card-actions>
+                                                                    <v-file-input label="รูปที่4" v-model="sellingPostPic4"
+                                                            @@change="preview_sellingPostPic4"></v-file-input>
+                                                                </v-card-actions>
+                                                            </v-card>
+                                                        </v-col>
+
+                                                        <v-col cols="3">
+                                                            <v-card>
+                                                                <v-card-text>
+                                                                    <v-img :src="sellingPostPic5Data"></v-img>
+                                                                </v-card-text>
+                                                                <v-card-actions>
+                                                                    <v-file-input label="รูปที่5" v-model="sellingPostPic5"
+                                                            @@change="preview_sellingPostPic5"></v-file-input>
+                                                                </v-card-actions>
+                                                            </v-card>
+                                                        </v-col>
+                                                        <v-btn @@click="overlay1 = false">ยกเลิก</v-btn>
+                                                        <v-btn @@click="addSellingPost">โพสต์</v-btn>
+                                                    </v-card-text>
+                                                </v-card>
+                                            </v-responsive>
+                                        </v-overlay>
+                                    </v-card>
+                                }
+                                //econ
+                            }
+                            //econ
+                        }
+                    </v-container>
+                    <v-container class="cardSection myShopPage" style="margin: auto;">
+                        <v-row>
+                            <v-col cols="12" v-for="(n,i) in sellingPostCard" :key="i">
+                                <v-card dark>
+                                    <v-row>
+                                        <v-col class="cardCol" cols="4">
+                                            <v-img class="cardImg" width="500px" height="300px" :src="n.sellingPostPic1"></v-img>
+                                        </v-col>
+                                        <v-col class="cardColTxt"  cols="8">
+                                            <table>
+                                                <tr>
+                                                    <th style="font-size: 1.5rem;">ฟาร์ม :</th>
+                                                    <td style="font-size: 1.5rem;">{{n.farmName}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th style="font-size: 1.5rem;">โพสต์ :</th>
+                                                    <td style="font-size: 1.5rem;">{{n.sellingPostName}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th style="font-size: 1.5rem;">ราคา :</th>
+                                                    <td style="font-size: 1.5rem;">{{n.price}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th style="font-size: 1.5rem;">โพสต์ : </th>
+                                                    <td style="font-size: 1.5rem;"> {{dateAndTimesellingPostCard[i].date}} {{dateAndTimesellingPostCard[i].monthName}}
+                                                        {{dateAndTimesellingPostCard[i].year}}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style="font-size: 1.5rem;" colspan="2">จำนวนผู้ชม: {{n.view}} จำนวนไลก์: {{n.postLike}}
+                                                    </td>
+                                                </tr>
+                                                @if (signInManager.IsSignedIn(User))
+                                                {
+                                                    //get user
+                                                    var user = userManager.GetUserAsync(User).Result;
+                                                    @if (user.isSeller > 0)
+                                                    {
+                                                        //get seller and seller package
+                                                        
+                                                        var seller = _context.Seller.Where(x => x.sellerId == user.isSeller).ToList()[0];
+                                                        var sellerId = (Json.Serialize(@ViewBag.theId)).ToString(); 
+                                                        sellerId = int.Parse(sellerId);
+                                                        @* var sellerPackage = _context.SellerPackage.Where(x => x.sellerId == sellerId && x.packageStatus == 1).ToList()[0]; *@
+                                                        @if (user.isSeller == sellerId)
+                                                        {
+                                                            <tr>
+                                                                <td class="red--text h6" colspan="2">หมดอายุ {{sellingPostPostExpiredDateDateTime[i]}}</td>
+                                                            </tr> 
+                                                        }//econ
+                                                    }//econ
+                                                }
+                                            </table>
+                                            <br>
+                                            <div class="iconShow">
+                                                <v-tooltip top v-if="n.pedegree==1"><template
+                                                        v-slot:activator="{ on, attrs }">
+                                                        <v-btn class="iconBtn marked" icon color="blue">
+                                                            <v-icon v-on="on" large>mdi-file-document</v-icon>
+                                                        </v-btn>
+                                                    </template>ผู้ขายได้แจ้งสามารถออกใบเพชรดีกรีได้</v-tooltip>
+                                            </div>
+                                        </v-col>
+                                    </v-row>
+                                    <v-btn block dark @@click="exploreSellingPost(n)">ดูข้อมูลเพิ่มเติม</v-btn>
+                                </v-card>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                </div>
+
+                @* content of feed post *@
+                <div class="tab-pane fade" :class="{ 'active show': isActive('sellerFeedPost') }" id="sellerFeedPost">
+                    @if (signInManager.IsSignedIn(User))
+                        {
+                            //get user
+                            var user = userManager.GetUserAsync(User).Result;
+                            @if (user.isSeller > 0)
+                            {
+                                //get seller and seller package
+                                var seller = _context.Seller.Where(x => x.sellerId == user.isSeller).ToList()[0];
+                                var sellerId = (Json.Serialize(@ViewBag.theId)).ToString(); 
+                                sellerId = int.Parse(sellerId);
+                                @if (user.isSeller == sellerId)
+                                {
+                                    <v-card>
+                                        <v-btn class="btn btn-success success btn-block" @@click="overlay2 = !overlay2">
+                                            <span class="h4">โพสต์อัพเดทประจำวัน !</span>
+                                        </v-btn>
+                                            <v-overlay :z-index="zIndex" :value="overlay2">
+                                                <v-responsive class="overflow-y-auto" height="500px" width="900px" style="float:left;">
+                                                    <v-card>
+                                                        <v-card-text>
+                                                            <span class="h6 red--text" id="desCheck2p"></span>
+                                                            <div style="margin:20px"><v-text-field  v-model="sellerFeedPost.description" label="คำบรรยายฟีดโพสต์" ></v-text-field></div>
+                                                            @* here *@
+                                                            <v-col cols="3">
+                                                                <v-card>
+                                                                    <v-card-text>
+                                                                    <v-img :src="feedPostPic1Data"   ></v-img>
+                                                                    </v-card-text>
+                                                                    <v-card-actions>
+                                                                    <v-file-input label="รูปภาพฟีดโพสต์1" v-model="feedPostPic1" @@change="preview_feedPostPic1"  ></v-file-input>
+                                                                    </v-card-actions>
+                                                                </v-card>
+                                                                </v-col>
+                            
+                                                                <v-col cols="3">
+                                                                <v-card>
+                                                                    <v-card-text>
+                                                                    <v-img :src="feedPostPic2Data"   ></v-img>
+                                                                    </v-card-text>
+                                                                    <v-card-actions>
+                                                                    <v-file-input label="รูปภาพฟีดโพสต์2" v-model="feedPostPic2" @@change="preview_feedPostPic2"  ></v-file-input>
+                                                                    </v-card-actions>
+                                                                </v-card>
+                                                                </v-col>
+
+                                                                <v-col cols="3">
+                                                                <v-card>
+                                                                    <v-card-text>
+                                                                    <v-img :src="feedPostPic3Data"   ></v-img>
+                                                                    </v-card-text>
+                                                                    <v-card-actions>
+                                                                    <v-file-input label="รูปภาพฟีดโพสต์3" v-model="feedPostPic3" @@change="preview_feedPostPic3"  ></v-file-input>
+                                                                    </v-card-actions>
+                                                                </v-card>
+                                                                </v-col>
+                                                                
+                                                                <v-col cols="3">
+                                                                <v-card>
+                                                                    <v-card-text>
+                                                                    <v-img :src="feedPostPic4Data"   ></v-img>
+                                                                    </v-card-text>
+                                                                    <v-card-actions>
+                                                                    <v-file-input label="รูปภาพฟีดโพสต์4" v-model="feedPostPic4" @@change="preview_feedPostPic4"  ></v-file-input>
+                                                                    </v-card-actions>
+                                                                </v-card>
+                                                                </v-col>
+
+                                                                <v-col cols="3">
+                                                                <v-card>
+                                                                    <v-card-text>
+                                                                    <v-img :src="feedPostPic5Data"   ></v-img>
+                                                                    </v-card-text>
+                                                                    <v-card-actions>
+                                                                    <v-file-input label="รูปภาพฟีดโพสต์5" v-model="feedPostPic5" @@change="preview_feedPostPic5"  ></v-file-input>
+                                                                    </v-card-actions>
+                                                                </v-card>
+                                                                
+                                                                </v-col>
+                                                            @* heree *@
+
+                                                            <v-btn @@click="overlay2 = false">ยกเลิก</v-btn>
+                                                            <v-btn @@click="addSellerFeedPost">โพสต์</v-btn>
+                                                        </v-card-text>
+                                                    </v-card>
+                                                </v-responsive>
+                                            </v-overlay>
+                                        
+                                    </v-card>
+                                }//econ
+                            }//econ
+                        }
+                        @* show feed post to public *@
+                        <div v-for="(n,i) in sellerFeedPosts" :key="i">
+                            <v-col cols="12">
+                                <v-card style="padding: 20px;">
+                                    <img width="60px" style="border-radius: 150px; margin-right:5px" :src="sellerProfilePic_Data"><span class="h4">{{seller.farmName}} <span class="h5 grey--text">ได้โพสต์</span></span>
+                                    <span>เมื่อเวลา {{postingDateTime[i]}}</span>
+                                    <br>
+                                    <v-card-text align="left" style="font-size: 2rem;">{{n.description}}</v-card-text>
+                                    <div align="center">
+                                        <v-img width="600" :src="n.feedPostPic1"></v-img>
+                                        <v-img width="300" style="display: inline-block" :src="n.feedPostPic2"></v-img>
+                                        <v-img width="300" style="display: inline-block" :src="n.feedPostPic3"></v-img>
+                                    </div>
+                                    @if (signInManager.IsSignedIn(User))
+                                    {
+                                        //get user
+                                        var user = userManager.GetUserAsync(User).Result;
+                                        @if (user.isSeller > 0)
+                                        {
+                                            //get seller and seller package
+                                            var seller = _context.Seller.Where(x => x.sellerId == user.isSeller).ToList()[0];
+                                            @if (user.isSeller == seller.sellerId)
+                                            {
+                                                <button style="margin:0 5px" @@click="deleteSellerFeedPost(n)" class="btn btn-danger">ลบ</button> 
+                                                <button style="margin:0 5px" @@click="openForEdit(n)" class="btn btn-success">แก้ไข</button>
+                                                <v-overlay :z-index="zIndex" :value="overlay3">
+                                                    <v-responsive class="overflow-y-auto" height="500px" width="900px" style="float:left;">
+                                                        <v-card>
+                                                            <v-card-text>
+                                                                <span class="h6 red--text" id="desCheck2p"></span>
+                                                                <div style="margin:20px"><v-text-field  v-model="sellerFeedPost.description" label="คำบรรยายฟีดโพสต์" ></v-text-field></div>
+                                                                @* here *@
+                                                                <v-col cols="3">
+                                                                    <v-card>
+                                                                        <v-card-text>
+                                                                        <v-img :src="feedPostPic1Data"   ></v-img>
+                                                                        </v-card-text>
+                                                                        <v-card-actions>
+                                                                        <v-file-input label="รูปภาพฟีดโพสต์1" v-model="feedPostPic1" @@change="preview_feedPostPic1"  ></v-file-input>
+                                                                        </v-card-actions>
+                                                                    </v-card>
+                                                                    </v-col>
+                                
+                                                                    <v-col cols="3">
+                                                                    <v-card>
+                                                                        <v-card-text>
+                                                                        <v-img :src="feedPostPic2Data"   ></v-img>
+                                                                        </v-card-text>
+                                                                        <v-card-actions>
+                                                                        <v-file-input label="รูปภาพฟีดโพสต์2" v-model="feedPostPic2" @@change="preview_feedPostPic2"  ></v-file-input>
+                                                                        </v-card-actions>
+                                                                    </v-card>
+                                                                    </v-col>
+
+                                                                    <v-col cols="3">
+                                                                    <v-card>
+                                                                        <v-card-text>
+                                                                        <v-img :src="feedPostPic3Data"   ></v-img>
+                                                                        </v-card-text>
+                                                                        <v-card-actions>
+                                                                        <v-file-input label="รูปภาพฟีดโพสต์3" v-model="feedPostPic3" @@change="preview_feedPostPic3"  ></v-file-input>
+                                                                        </v-card-actions>
+                                                                    </v-card>
+                                                                    </v-col>
+                                                                    
+                                                                    <v-col cols="3">
+                                                                    <v-card>
+                                                                        <v-card-text>
+                                                                        <v-img :src="feedPostPic4Data"   ></v-img>
+                                                                        </v-card-text>
+                                                                        <v-card-actions>
+                                                                        <v-file-input label="รูปภาพฟีดโพสต์4" v-model="feedPostPic4" @@change="preview_feedPostPic4"  ></v-file-input>
+                                                                        </v-card-actions>
+                                                                    </v-card>
+                                                                    </v-col>
+
+                                                                    <v-col cols="3">
+                                                                    <v-card>
+                                                                        <v-card-text>
+                                                                        <v-img :src="feedPostPic5Data"   ></v-img>
+                                                                        </v-card-text>
+                                                                        <v-card-actions>
+                                                                        <v-file-input label="รูปภาพฟีดโพสต์5" v-model="feedPostPic5" @@change="preview_feedPostPic5"  ></v-file-input>
+                                                                        </v-card-actions>
+                                                                    </v-card>
+                                                                    
+                                                                    </v-col>
+                                                                @* heree *@
+
+                                                                <v-btn @@click="overlay3 = false">ยกเลิก</v-btn>
+                                                                <v-btn @@click="confirmEdit(n)">แก้ไข</v-btn>
+                                                            </v-card-text>
+                                                        </v-card>
+                                                    </v-responsive>
+                                                </v-overlay>
+                                            }//econ
+                                        }//econ
+                                    }
+                                </v-card>
+                            </v-col>
+
+                        </div>
+                </div>
+            </div>
+
+
+
+
+
+
+
+        </v-main>
+    </v-app>
+</div>
+@section Scripts{
+<script>
+    var component = {
+        vuetify: new Vuetify(theme())
+        ,
+        el: "#app1"
+        ,
+        data: {
+            //feedback part
+            totalReview:0,
+            total5Review:0,
+
+            activeItem: 'sellingPost',
+            test: "hoho",
+            seller: {},
+            sellerProfilePic_Data: "",
+            //overlay part
+            overlay1: false,
+            zIndex: 1,
+            //sellingPost part
+            genders: [],
+            select_gender: {},
+            breeds: [],
+            select_breed: {},
+            //picture part
+            sellingPostPic1Data: '',
+            sellingPostPic1: [],
+
+            sellingPostPic2Data: '',
+            sellingPostPic2: [],
+
+            sellingPostPic3Data: '',
+            sellingPostPic3: [],
+
+            sellingPostPic4Data: '',
+            sellingPostPic4: [],
+
+            sellingPostPic5Data: '',
+            sellingPostPic5: [],
+            sellingPost: { sellingPostName: "", sellingPostDescription: "", dateOfBirth: "", pedegree: 0, price:0 },
+            
+            dateAndTimesellingPostCard:[],
+            dateAndTimesellingPostCard:[],
+            sellingPostPostExpiredDateDateTime:[],
+
+            //feedpostpart
+            sellerFeedPost:{description:""},
+            feedPostPic1Data:'',
+			feedPostPic1:[],
+            feedPostPic2Data:'',
+			feedPostPic2:[],
+            feedPostPic3Data:'',
+			feedPostPic3:[],
+            feedPostPic4Data:'',
+			feedPostPic4:[],
+            feedPostPic5Data:'',
+			feedPostPic5:[],
+            overlay2: false,
+            sellerFeedPosts:[],
+            postingDateTime:[],
+            overlay3: false,
+        }//edata
+        ,
+        methods: {
+            //seller revie part
+            reviewSeller(){
+                location="/SellerFeedback2/ReviewSeller/" + this.seller.sellerId;
+            }//ef
+            ,
+            exploreSellingPost(card){
+                location = "/SellingPost2/exploreSellingPost/"+card.sellingPostId;
+            }//ef
+            ,
+            isActive(menuItem) {
+                return this.activeItem === menuItem
+            },
+            setActive(menuItem) {
+                this.activeItem = menuItem
+            },
+
+            allApprovedSeller() {
+                location = "/Admin/ApproveSeller"
+            }//ef
+            ,
+            //selling post part
+            addSellingPost() {
+                this.sellingPost.genderId = this.select_gender.genderId;
+                this.sellingPost.breedId = this.select_breed.breedId;
+                this.sellingPost.sellingPostPic1 = this.sellingPostPic1Data;
+                this.sellingPost.sellingPostPic2 = this.sellingPostPic2Data;
+                this.sellingPost.sellingPostPic3 = this.sellingPostPic3Data;
+                this.sellingPost.sellingPostPic4 = this.sellingPostPic4Data;
+                this.sellingPost.sellingPostPic5 = this.sellingPostPic5Data;
+                this.sellingPost.sellerId = this.seller.sellerId;
+                //check completeness
+                var p1=0;
+                var p2=0;
+                var p3=0;
+                var p4=0;
+                var p5=0;
+                var p6=0;
+                //check selling post name
+                if(this.sellingPost.sellingPostName == ""){
+                    document.getElementById("nameCheck").innerHTML =""
+                    document.getElementById("nameCheck").innerHTML ="กรุณาใส่หัวข้อ"
+                    p1=0;
+                }
+                else if(this.sellingPost.sellingPostName != ""){
+                    document.getElementById("nameCheck").innerHTML =""
+                    p1=1;
+                }
+
+                //check price
+                if(this.sellingPost.price <= 0){
+                    document.getElementById("priceCheck").innerHTML =""
+                    document.getElementById("priceCheck").innerHTML ="กรุณาใส่ราคา"
+                    p2=0;
+                }
+                else if(this.sellingPost.price >0 ){
+                    document.getElementById("priceCheck").innerHTML =""
+                    p2=1;
+                }
+
+                //check description
+                if(this.sellingPost.sellingPostDescription == ""){
+                    document.getElementById("desCheck").innerHTML =""
+                    document.getElementById("desCheck").innerHTML ="กรุณาใส่คำอธิบาย"
+                    p3=0;
+                }
+                else if(this.sellingPost.sellingPostDescription != "" ){
+                    document.getElementById("desCheck").innerHTML =""
+                    p3=1;
+                }
+
+                //check birth day date
+                if(this.sellingPost.dateOfBirth == ""){
+                    document.getElementById("birthCheck").innerHTML =""
+                    document.getElementById("birthCheck").innerHTML ="กรุณาใส่วันเกิดลูกสุนัข"
+                    p4=0;
+                }
+                else if(this.sellingPost.dateOfBirth != "" ){
+                    document.getElementById("birthCheck").innerHTML =""
+                    p4=1;
+                }
+
+                //check birth day date
+                if(this.sellingPost.pedegree == 0){
+                    document.getElementById("pedCheck").innerHTML =""
+                    document.getElementById("pedCheck").innerHTML ="กรุณาระบุเกี่ยวกับการออกใบเพ็ดดีกรี"
+                    p5=0;
+                }
+                else if(this.sellingPost.pedegree != 0 ){
+                    document.getElementById("pedCheck").innerHTML =""
+                    p5=1;
+                }
+
+                //check birth day date
+                if(this.sellingPost.sellingPostPic1 == ""){
+                    document.getElementById("imgCheck").innerHTML =""
+                    document.getElementById("imgCheck").innerHTML ="กรุณาระบุเกี่ยวกับการออกใบเพ็ดดีกรี"
+                    p6=0;
+                }
+                else if(this.sellingPost.sellingPostPic1 != "" ){
+                    document.getElementById("imgCheck").innerHTML =""
+                    p6=1;
+                }
+                if(p1 == 0 ||p2 == 0 ||p3 == 0 ||p4 == 0 ||p5 == 0 ||p6 == 0){
+                    return;
+                }
+                var param = this.sellingPost;
+                var url = '/sellingPost2/add';
+                $.post(url, param).done(res => {
+                    if (res.error == 1) {
+                        console.log(res.exception);
+                        alert(res.message);
+                    }//econ
+                    else {
+                        //have to change the view here !!!!!!!!!11
+                        alert("โพสต์ประกาศเรียบร้อยแล้ว")
+                        location = "/SellingPost2/ExploreSellingPost/"+ res.id;
+                    }//econ
+                })//epost
+            },
+            preview_sellingPostPic1() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.sellingPostPic1); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.sellingPostPic1Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef 
+            ,
+            preview_sellingPostPic2() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.sellingPostPic2); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.sellingPostPic2Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef 
+            ,
+            preview_sellingPostPic3() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.sellingPostPic3); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.sellingPostPic3Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef 
+            ,
+            preview_sellingPostPic4() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.sellingPostPic4); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.sellingPostPic4Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef 
+            ,
+            preview_sellingPostPic5() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.sellingPostPic5); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.sellingPostPic5Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef 
+            ,
+            preview_feedPostPic1() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.feedPostPic1); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.feedPostPic1Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef
+            ,
+            preview_feedPostPic2() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.feedPostPic2); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.feedPostPic2Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef
+            ,
+            preview_feedPostPic3() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.feedPostPic3); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.feedPostPic3Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef
+            ,
+            preview_feedPostPic4() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.feedPostPic4); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.feedPostPic4Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef
+            ,
+            preview_feedPostPic5() {
+                const width = 800;
+                const height = 800;
+                const reader = new FileReader();
+                reader.readAsDataURL(this.feedPostPic5); //file1
+                reader.onload = () => {
+                    //1.create an image instance
+                    const img = new Image();
+
+                    //2.get the image src from reader
+                    img.src = event.target.result;
+
+                    //3.when the image is fully loaded, call onload
+                    img.onload = () => {
+                        //4 create dynamic html element as elem
+                        const elem = document.createElement('canvas')
+
+                        //5.set width and height of elem
+                        elem.width = width;
+                        elem.height = height;
+
+                        //6.setup the canvas as a blank2d drawing board
+                        const ctx = elem.getContext('2d');
+
+                        //7draw the content of the image instance  into the blank 2d drawing board
+                        ctx.drawImage(img, 0, 0, width, height)
+
+                        //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+                        this.feedPostPic5Data = ctx.canvas.toDataURL(img, "image/*", 0.9);
+                    }
+                }
+                reader.onerror = function (error) {
+                    console.log('Error: ', error)
+                }//ev
+            }//ef
+            ,
+            addSellerFeedPost(){
+                if(this.sellerFeedPost.description == ""){
+                    document.getElementById("desCheck2p").innerHTML ="กรุณาเขียนอะไรสักหน่อย"
+                    return;
+                }
+                else if(this.sellerFeedPost.description != ""){
+                    document.getElementById("desCheck2p").innerHTML =""
+                }
+                this.sellerFeedPost.feedPostPic1 = this.feedPostPic1Data;
+                this.sellerFeedPost.feedPostPic2 = this.feedPostPic2Data;
+                this.sellerFeedPost.feedPostPic3 = this.feedPostPic3Data;
+                this.sellerFeedPost.feedPostPic4 = this.feedPostPic4Data;
+                this.sellerFeedPost.feedPostPic5 = this.feedPostPic5Data;
+                this.sellerFeedPost.sellerId=this.seller.sellerId;
+                $.post("/SellerFeedPost2/Add",this.sellerFeedPost).done(res =>{
+                    if(res.error==-1){
+                        alert("โพสต์เรียบร้อยแล้ว")
+                        location.reload();
+                    }//econ
+                    else{
+                        alert(res.exception);
+                    }//econ
+                })//epost
+            }//ef
+            ,
+            deleteSellerFeedPost(n){
+                $.post("/SellerFeedPost2/Delete",n).done(res=>{
+                    if(res.error==-1){
+                        alert("ลบเรียบร้อย");
+                        location.reload();
+                    }//econ
+                    else{
+                        alert(res.msg)
+                    }
+                })
+
+            }//ef
+            ,
+            openForEdit(n){
+                @* console.log(n);
+                console.log(this.sellerFeedPost); *@
+                //assign picture part for edit
+                this.sellerFeedPost.description = n.description
+                this.feedPostPic1Data = n.feedPostPic1;
+                this.feedPostPic2Data = n.feedPostPic2;
+                this.feedPostPic3Data = n.feedPostPic3;
+                this.feedPostPic4Data = n.feedPostPic4;
+                this.feedPostPic5Data = n.feedPostPic5;
+                this.overlay3 = !this.overlay3
+            }//ef
+            ,
+            confirmEdit(n){
+                this.sellerFeedPost.sellerId = n.sellerId;
+                this.sellerFeedPost.sellerFeedPostId = n.sellerFeedPostId;
+                this.sellerFeedPost.feedPostPic1 = this.feedPostPic1Data;
+                this.sellerFeedPost.feedPostPic2 = this.feedPostPic2Data;
+                this.sellerFeedPost.feedPostPic3 = this.feedPostPic3Data;
+                this.sellerFeedPost.feedPostPic4 = this.feedPostPic4Data;
+                this.sellerFeedPost.feedPostPic5 = this.feedPostPic5Data;
+                this.sellerFeedPost.postingDateTime = n.postingDateTime;
+                $.post("/SellerFeedPost2/Edit",this.sellerFeedPost).done(res=>{
+                    if(res.error ==-1){
+                        alert("แก้ไขเรียบร้อย");
+                        location.reload()
+                    }//econ
+                    else{
+                        alert(res.exception);
+                    }//econ
+                })//epost
+            }
+            
+            
+        }//emethods
+        ,
+        created() {
+            //=== begin gender ===
+            this.genders = @Html.Raw(Json.Serialize(@ViewBag.genders));
+            this.select_gender = this.genders[0];
+            //=== begin gender ===
+
+            //=== begin breed ===
+            this.breeds = @Html.Raw(Json.Serialize(@ViewBag.breeds));
+            this.select_breed = this.breeds[0];
+            //=== begin breed ===
+            
+            //seller part
+            var seller = @Html.Raw(Json.Serialize(@ViewBag.seller))
+            this.seller = seller[0]
+            console.log(this.seller);
+            this.sellerProfilePic_Data = "/sellerProfilePic/" + this.seller.sellerId + "sellerProfilePic.png"
+            
+
+            //card part in selling post
+            var internationalNumberFormat = new Intl.NumberFormat('en-US');
+            var nameOfMonth = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤษจิกายน', 'ธันวาคม'];
+
+            this.sellingPostCard = @Html.Raw(Json.Serialize(@ViewBag.sellingPostCard));
+            this.sellingPostCard = this.sellingPostCard.value;
+            for (var i of this.sellingPostCard) {
+                i.price = internationalNumberFormat.format(i.price) + " บาท";
+            }//eloop
+            console.log("it is here",this.sellingPostCard)
+            for (var i = 0; i < this.sellingPostCard.length; i++) {
+                var date = this.sellingPostCard[i].sellingPostPostingDateTime.slice(8, 10);
+                var month = this.sellingPostCard[i].sellingPostPostingDateTime.slice(5, 7);
+                var monthName = nameOfMonth[parseInt(month) - 1]
+                var year = parseInt(this.sellingPostCard[i].sellingPostPostingDateTime.slice(0, 4)) + 543;
+                var time = this.sellingPostCard[i].sellingPostPostingDateTime.slice(11, 16);
+                var o = { date, month, monthName, year, time }
+                this.dateAndTimesellingPostCard.push(o);
+            }//eloop
+
+            //feedback part
+            this.totalReview = @Html.Raw(Json.Serialize(@ViewBag.totalReview));
+            this.total5Review = @Html.Raw(Json.Serialize(@ViewBag.total5Review));
+
+            //seller feed post part
+            this.sellerFeedPosts = @Html.Raw(Json.Serialize(@ViewBag.sellerFeedPosts));
+            for(var i of this.sellerFeedPosts){
+                i.feedPostPic1 = "/feedPostPic/"+i.sellerFeedPostId+"feedPostPic1.png"
+                i.feedPostPic2 = "/feedPostPic/"+i.sellerFeedPostId+"feedPostPic2.png"
+                i.feedPostPic3 = "/feedPostPic/"+i.sellerFeedPostId+"feedPostPic3.png"
+                i.feedPostPic4 = "/feedPostPic/"+i.sellerFeedPostId+"feedPostPic4.png"
+                i.feedPostPic5 = "/feedPostPic/"+i.sellerFeedPostId+"feedPostPic5.png"
+            }//eloop
+            for (var i = 0; i < this.sellerFeedPosts.length; i++) {
+                var date = this.sellerFeedPosts[i].postingDateTime.slice(8, 10);
+                var month = this.sellerFeedPosts[i].postingDateTime.slice(5, 7);
+                var monthName = nameOfMonth[parseInt(month) - 1]
+                var year = parseInt(this.sellerFeedPosts[i].postingDateTime.slice(0, 4)) + 543;
+                var time = this.sellerFeedPosts[i].postingDateTime.slice(11, 16);
+                var o = { date, month, monthName, year, time }
+                var sentence = date +" " + monthName +" "+ year;
+                this.postingDateTime.push(sentence);
+            }//eloop
+            
+            for (var i = 0; i < this.sellingPostCard.length; i++) {
+                var date = this.sellingPostCard[i].sellingPostPostExpiredDate.slice(8, 10);
+                var month = this.sellingPostCard[i].sellingPostPostExpiredDate.slice(5, 7);
+                var monthName = nameOfMonth[parseInt(month) - 1]
+                var year = parseInt(this.sellingPostCard[i].sellingPostPostExpiredDate.slice(0, 4)) + 543;
+                var time = this.sellingPostCard[i].sellingPostPostExpiredDate.slice(11, 16);
+                var o = { date, month, monthName, year, time }
+                var sentence = date +" " + monthName +" "+ year;
+                this.sellingPostPostExpiredDateDateTime.push(sentence);
+                
+            }//eloop
+            console.log(this.sellerFeedPost);
+
+        }//ecreated
+    }//ecomponent
+    var app = new Vue(component);
+</script>
+}

@@ -1,0 +1,86 @@
+<div id="app1">
+    <v-app>
+        <v-main>
+            <span class="h1">โพสต์ประกาศขายทั้งหมด</span>
+            <v-text-field v-model="search" append-icon="mdi-magnify" label="ค้นหา" single-line hide-details></v-text-field>
+            <v-data-table :search='search' :headers='headers' :items='sellingPosts' dark  fixed-header
+                :footer-props="{ 'items-per-page-options': [25, 50,100] }" :items-per-page="25" class='elevation-1' />
+            <template v-slot:item.actions='{item}'>
+                <img :src="item.sellingPostPic1" width="250px" />
+                
+            </template>
+            <template v-slot:item.actions2='{item}'>
+                                <v-btn large class="white--text mr-1"color="blue darken-1"
+                                @@click="exploreSellingPost(item)"
+                                >
+                                    <v-icon>mdi-magnify</v-icon>
+                                </v-btn>
+                        </template>
+            </v-data-table>
+    
+        </v-main>
+    </v-app>
+
+</div>
+@section Scripts{
+<script>
+    var component = {
+        vuetify: new Vuetify(theme())
+        ,
+        el: "#app1"
+        ,
+        data: {
+            test: "hoho",
+            sellingPosts: [],
+            search: "",
+            headers: [
+                { text: 'รูปภาพยืนยัน', value: 'actions', sortable: false, class: 'white--text blue darken-2' },
+                { text: 'หัวข้อ', value: 'sellingPostName', align: 'left', sortable: true, class: 'white--text blue darken-2' },
+                { text: 'เพศ', value: 'genderName', align: 'left', sortable: true, class: 'white--text blue darken-2' },
+                { text: 'พันธุ์', value: 'breedNameThai', align: 'left', sortable: true, class: 'white--text blue darken-2' },
+                { text: 'ราคา', value: 'price', align: 'left', sortable: true, class: 'white--text blue darken-2' },
+                { text: 'โพสต์เมื่อวันที่', value: 'sellingPostPostingDateTime', align: 'left', sortable: true, class: 'white--text blue darken-2' },
+                { text: 'ยอดผู้ชม', value: 'view', align: 'left', sortable: true, class: 'white--text blue darken-2' },
+                { text: 'จำนวนคนกดไลค์', value: 'postLike', align: 'left', sortable: true, class: 'white--text blue darken-2' },
+                {text:'ดูโพสต์',value:'actions2',align:'left',sortable:true,class: 'white--text blue darken-2'}   
+            ]
+        }//edata
+        ,
+        created() {
+            this.sellingPosts = @Html.Raw(Json.Serialize(@ViewBag.sellingPosts));
+            //edit date
+            var nameOfMonth = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤษจิกายน', 'ธันวาคม'];
+            for (var i = 0; i < this.sellingPosts.length; i++) {
+                var date = this.sellingPosts[i].sellingPostPostingDateTime.slice(8, 10);
+                var month = this.sellingPosts[i].sellingPostPostingDateTime.slice(5, 7);
+                var monthName = nameOfMonth[parseInt(month) - 1]
+                var year = parseInt(this.sellingPosts[i].sellingPostPostingDateTime.slice(0, 4)) + 543;
+                var time = this.sellingPosts[i].sellingPostPostingDateTime.slice(11, 16);
+                this.sellingPosts[i].sellingPostPostingDateTime = date + " " + monthName + " " + year;
+            }//eloop
+
+            //edit price and add image
+            internationalNumberFormat = new Intl.NumberFormat('en-US');
+            for (var i of this.sellingPosts) {
+                //price
+                i.price = internationalNumberFormat.format(i.price) + " บาท";
+
+                //image
+                i.sellingPostPic1 = "/sellingPostPic/" + i.sellingPostId + "sellingPostPic1.png"
+            }//eloop
+
+
+            console.log(this.sellingPosts);
+        }//ecreated
+        ,
+        methods: {
+            exploreSellingPost(item){
+                location = "/SellingPost2/ExploreSellingPost/"+item.sellingPostId;
+            }//ef
+
+        }//emethods
+
+    }//ecomponent
+    var app = new Vue(component);
+</script>
+}

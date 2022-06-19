@@ -1,0 +1,158 @@
+<nav aria-label='breadcrumb'>
+  <ol class='breadcrumb breadcrumb-arrow'>
+    <li class='breadcrumb-item'><a href='/breed/index'>breed</a></li>
+    <li class='breadcrumb-item active' aria-current='page'>create</li>
+  </ol>
+</nav>
+<div id='app1' v-cloak>
+
+  <v-app>
+
+    <v-card>
+      <v-card-title>
+      </v-card-title>
+      <v-card-text>
+        <div style="margin:20px">
+          <v-text-field v-model="breed.breedNameThai" label="ชื่อสายพันธุ์ภาษาไทย"></v-text-field>
+        </div>
+
+        <div style="margin:20px">
+          <v-text-field v-model="breed.breedNameEng" label="ชื่อสายพันธุ์ภาษาอังกฤษ"></v-text-field>
+        </div>
+
+        <v-col cols="3">
+          <v-card>
+            <v-card-text>
+              <v-img :src="breedPicData"></v-img>
+            </v-card-text>
+            <v-card-actions>
+              <v-file-input label="รูปสายพันธ์ุ" v-model="breedPic" @@change="preview_breedPic"></v-file-input>
+            </v-card-actions>
+          </v-card>
+
+        </v-col>
+
+
+        <div style="margin:20px">
+          <v-text-field v-model="breed.breedDescription" label="คำอธิบายสายพันธ์"></v-text-field>
+        </div>
+
+        <div style="margin:20px">
+          <v-text-field v-model="breed.total" label="จำนวนทั้งหมด"></v-text-field>
+        </div>
+
+
+      </v-card-text>
+      <v-card-actions>
+        <v-btn @@click='add_breed' color='blue' outlined>
+          <v-icon>
+            mdi-content-save-edit
+          </v-icon>
+        </v-btn>
+      </v-card-actions>
+
+    </v-card>
+  </v-app>
+</div>
+@section scripts{
+<script>
+  var app;
+  var component = {
+    vuetify: new Vuetify(theme())
+    ,
+    el: '#app1'
+    ,
+    data: {
+      breed: {}
+      ,
+      breedPicData: '',
+      breedPic: [],
+
+
+    }//edata
+    ,
+    created() {
+
+    }//ecreated
+    ,
+    methods: {
+      add_breed() {
+        this.breed.breedPic = this.breedPicData;
+
+        var url = '/breed/add';
+        var param = this.breed;
+        $.post(url, param)
+          .done(res => {
+            //console.log(res);return;
+            if (res.error == -1) {
+              window.location = '/breed/index';
+            }
+            else {
+              alert(res.exception);
+            }
+          });
+
+
+      }//ef
+      ,
+      preview_breedPic() {
+        @* const reader = new FileReader();
+        reader.readAsDataURL(this.breedPic); //file1
+        reader.onload = () => {
+          this.breedPicData = reader.result; //imageData
+        }//ev
+        reader.onerror = function (error) {
+          console.log('Error: ', error)
+        }//ev *@
+
+
+        const width = 300;
+        const height = 500;
+        const reader = new FileReader();
+        reader.readAsDataURL(this.breedPic); //file1
+        reader.onload = () => {
+          //1.create an image instance
+          const img = new Image();
+
+          //2.get the image src from reader
+          img.src = event.target.result;
+
+          //3.when the image is fully loaded, call onload
+          img.onload = () => {
+            //4 create dynamic html element as elem
+            const elem = document.createElement('canvas')
+
+            //5.set width and height of elem
+            elem.width = width;
+            elem.height = height;
+
+            //6.setup the canvas as a blank2d drawing board
+            const ctx = elem.getContext('2d');
+
+            //7draw the content of the image instance  into the blank 2d drawing board
+            ctx.drawImage(img, 0, 0, width, height)
+
+            //8. convert  the data drwawing board into base64 data with 0.9 quality scale
+            this.breedPicData = ctx.canvas.toDataURL(img, "image/*", 0.9);
+          }
+        }
+        reader.onerror = function (error) {
+          console.log('Error: ', error)
+        }//ev
+
+      }//ef    
+      
+
+
+    }//emethod
+    ,
+    computed: {
+
+    }//ecomputed
+  };
+  app = new Vue(component);
+
+
+</script>
+
+}

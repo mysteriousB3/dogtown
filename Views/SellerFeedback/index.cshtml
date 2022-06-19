@@ -1,0 +1,117 @@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb breadcrumb-arrow">
+        <li class="breadcrumb-item active" aria-current="page">sellerFeedback</li>
+    </ol>
+</nav>
+<div id='app1' v-cloak>
+
+    <v-app>
+        <v-main>
+             <v-btn
+              class="white--text"
+              color="green darken-1"
+              @@click='add_sellerfeedback'
+             >
+                 <v-icon>
+                   mdi-plus
+                 </v-icon>
+                 
+             </v-btn>
+			<v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search"
+                    single-line
+                    hide-details
+                ></v-text-field>
+             <v-data-table
+			 :search = 'search'
+             :headers ='headers'
+             :items   ='sellerFeedbacks'
+             :footer-props="{ 'items-per-page-options': [25, 50,100] }"
+             :items-per-page="25"
+              class='elevation-1'
+             />
+                  <template v-slot:item.actions='{item}'>
+                        <v-btn small class="white--text mr-1"color="blue darken-1"
+                        @@click="edit_sellerfeedback(item)"
+                        >
+                            <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                        <v-btn small class="white--text"color="red darken-1"
+                        @@click="remove_sellerfeedback(item)"
+                        >
+                            <v-icon>mdi-trash-can</v-icon>
+                        </v-btn>
+                  </template>
+             </v-data-table>
+        </v-main>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                   search :'',
+                   sellerFeedbacks:[]
+                   ,
+                   headers:[
+                      {text:'SellerFeedback',value:'sellerFeedbackId',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'คนรีวิว',value:'user',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เวลาที่รีวิว',value:'feedbackDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'จำนวนดาวที่ให้',value:'feedbackStar',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'บทความรีวิว',value:'feedbackDescription',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'ฟาร์มที่ถูกรีวิว',value:'seller',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'actions',value:'actions',align:'left',sortable:true,class: 'white--text blue darken-2'}
+
+					]
+                }//edata
+                ,
+                created(){
+                  this.sellerFeedbacks = @Html.Raw(Json.Serialize(@ViewBag.sellerFeedbacks));
+                }//ecreated
+                ,
+                methods:{
+                    add_sellerfeedback(){
+                        window.location= '/sellerfeedback/add';
+                  
+                        
+                    }//ef
+                    ,
+                    edit_sellerfeedback(item){
+                        window.location = '/sellerfeedback/edit/'+item.sellerFeedbackId;
+                    }
+                    ,
+                    remove_sellerfeedback(item){
+                          if (confirm("To proceed, please click OK")) {
+                              var id = item.sellerFeedbackId;
+                              $.post( "/sellerfeedback/delete/"+item.sellerFeedbackId)
+                              .done((res)=> {
+                                  if(res.error == -1){
+                                      this.sellerFeedbacks = this.sellerFeedbacks.filter(x=>x.sellerFeedbackId != item.sellerFeedbackId);
+                                  }//endif
+
+                              })
+                              .fail(function(res) {
+                                  alert( res.msg);
+                              });
+                          } //end if 
+                    }//ef
+
+                }//emethods
+                ,
+                computed:{
+
+                }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

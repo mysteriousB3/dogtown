@@ -1,0 +1,239 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div id="box1" >
+    <v-app>
+        <v-main>
+            <v-carousel height="550" hide-delimiter-background cycle interval="10000" show-arrows-on-hover>
+                <v-carousel-item v-for="pic in homePics" :src="pic.src">
+                    <div class="homeTxt">
+                        <h1 class='homeTxtHeading'>{{pic.headInfo}}</h1>
+                        <h2 class='homeTxtSub1'>{{pic.subInfo}}</h2>
+                    </div>
+                </v-carousel-item>
+            </v-carousel>
+            <br><br>
+            <v-container class="middlePart">
+                <div style="background-color:black; width:755px; padding:5px; border-radius:10px; display:inline-block;"><a class="h1 white--text" href="/SellingPost2">ดูโพสต์ประกาศขายทั้งหมด ({{numberOfPost}})</a></div>
+                <v-responsive class="overflow-y-auto" height="550px" width="750px" style="float:left;">
+                    <v-text-field append-icon="mdi-magnify" label="Search" v-on:input="doTest($event)"></v-text-field>
+                    <v-row>
+                        <v-col cols="4" v-for="n in dogs">
+                            <v-card color="black">
+                                <v-img :src="n.breedPic" height="350"></v-img>
+                                <v-card-title class="white--text">
+                                    <v-btn dark block @@click="exploreEachBreed(n)">{{n.breedNameThai}} ({{n.total}})</v-btn>
+                                </v-card-title>
+                            </v-card>
+                        </v-col>
+                    </v-row>
+                </v-responsive>
+                    <span class="top5">ท็อป 3</span>
+                <table id="suggestionTable">
+                    <thead>
+                        <tr>
+                            <th class="mainHead" colspan="2">3 โพสต์เด่นประจำสัปดาห์</th>
+                        </tr>
+                    </thead>                    
+                    <tbody v-for="(sug,i) in suggestion" :key="i">
+                        <tr>
+                            <td rowspan="5">
+                                <v-img  id="imgTable" height="150px" @@click="exploreSellingPost(sug)" :src="sug.sellingPostPic1"></v-img>
+                            </td>                           
+                        </tr>
+                        
+                        <tr>
+                            <th class=suggestionHeading><a  @@click="exploreSellingPost(sug)">{{sug.sellingPostName}}</a></th>
+                        </tr>
+                        <tr>
+                            <th>ราคา: {{sug.price}}</th>
+                        </tr>
+                        <tr>
+                            <th>โดย <a class="green--text"  @@click ="exploreShop(sug)">{{sug.farmName}}</a></th>
+                        </tr>
+                        <tr>
+                            <td>โพสต์เมื่อ: {{dateAndTime[i].date}} {{dateAndTime[i].monthName}} {{dateAndTime[i].year}}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="space" colspan="2"></td>
+                        </tr>
+
+                    </tbody>
+
+                </table>
+            </v-container>
+            <br clear="all">
+            <div style="background-color: #DFDFDE; padding:10px; border-radius:10px" class="cardSection">
+                <div class="h1" style="font-weight: 900;"> 8 โพสต์ล่าสุดของเว็บไซต์เรา</div><br>
+                <v-row>
+                    <v-col cols="6" v-for="(n,i) in card" :key="i">
+                        <v-card dark>
+                            <v-row>
+                                <v-col class="cardCol" cols="4"><v-img class="cardImg"  :src="n.sellingPostPic1"></v-img></v-col>
+                                <v-col class="cardColTxt" cols="7">
+                                    <table>
+                                        <tr>
+                                            <th>ฟาร์ม :</th>
+                                            <td>{{n.farmName}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th >โพสต์ :</th>
+                                            <td >{{n.sellingPostName}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th >ราคา :</th>
+                                            <td >{{n.price}}</td>
+                                        </tr>
+                                        <tr>
+                                            <th>โพสต์ : </th>
+                                            <td> {{dateAndTimeCard[i].date}} {{dateAndTimeCard[i].monthName}} {{dateAndTimeCard[i].year}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td colspan="2">จำนวนผู้ชม: {{n.view}} จำนวนไลก์: {{n.postLike}}</td>
+                                        </tr>
+                                        
+                                        
+                                    </table>
+                                    <br>
+                                    <div class="iconShow">
+                                        <v-tooltip top v-if="n.pedegree==1"><template v-slot:activator="{ on, attrs }"><v-btn  class="iconBtn marked" icon color="blue" ><v-icon v-on="on"large>mdi-file-document</v-icon></v-btn></template>ผู้ขายได้แจ้งสามารถออกใบเพชรดีกรีได้</v-tooltip>
+                                    </div>
+                                    
+                                    
+                                </v-col>
+                            </v-row>
+                            <v-btn block dark @@click="exploreSellingPost(n)">ดูข้อมูลเพิ่มเติม</v-btn>
+                        </v-card>
+                    </v-col>
+
+                </v-row>
+
+            </div>
+
+
+        </v-main>
+    </v-app>
+
+
+</div>
+
+@section scripts{
+<script>
+    var component = {
+        vuetify: new Vuetify(theme()),
+        el: "#box1",
+        data: {
+            numberOfPost:0,
+            search: '',
+            filterText: "",
+            dogs: [],
+            dogs2: [],
+            orginal: [],
+            suggestion: [],
+            dateAndTime: [],
+            dateAndTimeCard: [],
+            show:[],
+            card: [],
+            @* show: false, *@
+            homePics: [{ src: 'homePic/homePic4.jpeg', headInfo: "DogTown", subInfo: "ที่สำหรับคนรักหมา" }, { src: 'homePic/homePic3.jpeg' }, { src: 'homePic/homePic6.jpeg' }]
+        }//edata
+        ,
+        methods: {
+            doTest(text) {
+                this.dogs = []
+                text = text.toLowerCase()
+                @* console.log(text) *@
+                for (var i of this.dogs2) {
+                    i.breedNameEng = i.breedNameEng.toLowerCase()
+                    if (i.breedNameEng.includes(text) || i.breedNameThai.includes(text)) {
+                        this.dogs.push(i)
+
+                    }//econ
+                }//eloop         
+            }//ef
+            
+            ,
+            showD(i){
+                if(this.show[i]==true){
+                    this.show[i]==false;
+                }//econ
+                else if (this.show[i]==false){
+                    this.show[i]=true;
+                }//econ
+            }//ef
+            ,
+            exploreShop(card){
+                location = "/seller2/myshop/"+card.sellerId;
+                @* console.log(card.sellerId) *@
+            }//ef
+            ,
+            exploreSellingPost(card){
+                location = "/SellingPost2/exploreSellingPost/"+card.sellingPostId;
+            }//ef
+            ,
+            exploreEachBreed(n){
+                location ="SellingPost2/ExploreEachBreed/"+n.breedId;
+            }//ef
+                           
+        }//emethods
+        ,
+
+        created() {
+            this.numberOfPost = @Html.Raw(Json.Serialize(@ViewBag.numberOfPost));
+
+            this.dogs = @Html.Raw(Json.Serialize(@ViewBag.dogList));
+            this.dogs = this.dogs.value;
+            this.dogs2 = @Html.Raw(Json.Serialize(@ViewBag.dogList));
+            this.dogs2 = this.dogs2.value;
+            this.original = @Html.Raw(Json.Serialize(@ViewBag.dogList));
+            this.original = this.original.value
+
+            this.suggestion = @Html.Raw(Json.Serialize(@ViewBag.suggestionTable));
+            this.suggestion = this.suggestion.value
+            internationalNumberFormat = new Intl.NumberFormat('en-US');
+            for (var i of this.suggestion) {
+                i.price = internationalNumberFormat.format(i.price) + " บาท";
+            }//eloop
+            var nameOfMonth = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤษจิกายน', 'ธันวาคม'];
+            for (var i = 0; i < this.suggestion.length; i++) {
+                var date = this.suggestion[i].sellingPostPostingDateTime.slice(8, 10);
+                var month = this.suggestion[i].sellingPostPostingDateTime.slice(5, 7);
+                var monthName = nameOfMonth[parseInt(month) - 1]
+                var year = parseInt(this.suggestion[i].sellingPostPostingDateTime.slice(0, 4)) + 543;
+                var time = this.suggestion[i].sellingPostPostingDateTime.slice(11, 16);
+                var o = { date, month, monthName, year, time }
+                this.dateAndTime.push(o);
+            }//eloop
+
+            this.card = @Html.Raw(Json.Serialize(@ViewBag.card));
+            this.card = this.card.value;
+            for (var i of this.card) {
+                i.price = internationalNumberFormat.format(i.price) + " บาท";
+            }//eloop
+           
+            for (var i = 0; i < this.card.length; i++) {
+                var date = this.card[i].sellingPostPostingDateTime.slice(8, 10);
+                var month = this.card[i].sellingPostPostingDateTime.slice(5, 7);
+                var monthName = nameOfMonth[parseInt(month) - 1]
+                var year = parseInt(this.card[i].sellingPostPostingDateTime.slice(0, 4)) + 543;
+                var time = this.card[i].sellingPostPostingDateTime.slice(11, 16);
+                var o = { date, month, monthName, year, time }
+                this.dateAndTimeCard.push(o);
+            }//eloop
+   
+            
+            
+        }//ecreated
+        ,
+        mounted(){
+            
+            
+        }//emounted
+    }//ecomponent
+    var app = new Vue(component);
+    
+
+</script>
+}

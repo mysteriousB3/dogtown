@@ -1,0 +1,231 @@
+ @using Microsoft.AspNetCore.Identity
+@using dog7.Data
+@inject SignInManager<AppUser> signInManager
+@inject UserManager<AppUser> userManager
+@inject dog7DbContext _context
+@using System.Linq
+
+<div id='app1' v-cloak>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb breadcrumb-arrow">
+            <li class="breadcrumb-item active" aria-current="page">รีวิวทั้งหมด ของ {{farmName}}</li>
+        </ol>
+    </nav>   
+
+    <v-app>
+        <v-main>
+            <v-card>
+                <v-card-text>
+                    <div class="h2 grey--text" style="text-align:center">เขียนรีวิว</div><br>
+                    <div>
+                        <v-row>
+                            <v-col cols="4">
+                                <div class="h6 grey--text">จำนวนดาวที่จะให้</div>
+                                <v-radio-group v-model="toReview.feedbackStar" mandatory>
+                                    <v-radio value="1">
+                                        <template v-slot:label>
+                                            <strong class="dark--text"><v-icon>mdi-star</v-icon></strong>
+                                        </template>
+                                    </v-radio>
+                                    <v-radio value="2">
+                                    <template v-slot:label>
+                                        <strong class="dark--text"><v-icon>mdi-star</v-icon><v-icon>mdi-star</v-icon></strong>
+                                        </template>
+                                    </v-radio>
+                                    <v-radio value="3">
+                                    <template v-slot:label>
+                                        <strong class="dark--text"><v-icon>mdi-star</v-icon><v-icon>mdi-star</v-icon><v-icon>mdi-star</v-icon></strong>
+                                        </template>
+                                    </v-radio>
+                                    <v-radio value="4">
+                                    <template v-slot:label>
+                                        <strong class="dark--text"><v-icon>mdi-star</v-icon><v-icon>mdi-star</v-icon><v-icon>mdi-star</v-icon><v-icon>mdi-star</v-icon></strong>
+                                        </template>
+                                    </v-radio>
+                                    <v-radio value="5">
+                                    <template v-slot:label>
+                                        <strong class="dark--text"><v-icon>mdi-star</v-icon><v-icon>mdi-star</v-icon><v-icon>mdi-star</v-icon><v-icon>mdi-star</v-icon><v-icon>mdi-star</v-icon></strong>
+                                        </template>
+                                    </v-radio>
+                                </v-radio-group>
+                            </v-col>
+                            <v-col cols="6">
+                                <div class="h6 grey--text">เขียนข้อความรีวิว</div>
+                                <v-textarea v-model="toReview.feedbackDescription"></v-textarea>
+                            </v-col>
+                        </v-row>
+                        <v-row>
+                            @if (signInManager.IsSignedIn(User)){
+                                var user = userManager.GetUserAsync(User).Result;
+                                //check to not allow sellers review themselves
+                                int getIsShop = user.isSeller;
+                                var sellerId = (Json.Serialize(@ViewBag.sellerId)).ToString();
+                                sellerId = int.Parse(sellerId);
+                                if(getIsShop != sellerId){
+                                    <button @@click="addReview(@user.Id,@sellerId)" class="btn btn-block btn-primary">
+                                        ส่งรีวิว
+                                    </button>
+                                }//econ
+                                else{
+                                    <button @@click="selfReview" class="btn btn-block btn-primary">
+                                        ส่งรีวิว
+                                    </button>
+                                }//econ
+                            }
+                            @if(!signInManager.IsSignedIn(User)){
+                                <button @@click="goLogin" class="btn btn-block btn-primary">
+                                    ส่งรีวิว
+                                </button>
+                            }
+                            
+                        </v-row>
+                    </div>
+                </v-card-text>
+            </v-card>
+            <br><br>
+            			<v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search"
+                    single-line
+                    hide-details
+                ></v-text-field>
+             <v-data-table
+			 :search = 'search'
+             :headers ='headers'
+             :items   ='theSellerFeedbacks'
+             :footer-props="{ 'items-per-page-options': [25, 50,100] }"
+             :items-per-page="25"
+              class='elevation-1'
+             />
+                  <template v-slot:item.actions='{item}'>
+                        @* <v-btn small class="white--text mr-1"color="blue darken-1"
+                        @@click="edit_sellerfeedback(item)"
+                        >
+                            <v-icon>mdi-pencil</v-icon>
+                        </v-btn> *@
+                        @* if role is admin, can delete *@
+                        @if(signInManager.IsSignedIn(User)){
+                       var user = userManager.GetUserAsync(User).Result;
+                       var role = userManager.GetRolesAsync(user).Result[0];
+                            if(role=="admin"){
+                                <v-btn small class="white--text"color="red darken-1"
+                                @@click="remove_sellerfeedback(item)"
+                                >
+                                    <v-icon>mdi-trash-can</v-icon>
+                                </v-btn>
+                            }//econ
+                       }
+                  </template>
+             </v-data-table>
+             
+        </v-main>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                   search :'',
+                   theSellerFeedbacks:[],
+                   headers:[
+                      {text:'คนรีวิว',value:'user',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เวลาที่รีวิว',value:'feedbackDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'จำนวนดาวที่ให้',value:'feedbackStar',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'บทความรีวิว',value:'feedbackDescription',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'actions',value:'actions',align:'left',sortable:true,class: 'white--text blue darken-2'}
+
+					],
+                   sellerId:0,
+                   farmName:"",
+                   toReview:{feedbackStar:0},
+                   adm:"",
+                }//edata
+                ,
+                created(){
+                    
+                  this.theSellerFeedbacks = @Html.Raw(Json.Serialize(@ViewBag.theSellerFeedbacks));
+                  this.sellerId = @Html.Raw(Json.Serialize(@ViewBag.sellerId));
+                  this.farmName = @Html.Raw(Json.Serialize(@ViewBag.farmName));
+                  var nameOfMonth = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤษจิกายน', 'ธันวาคม'];
+                  for (var i = 0; i < this.theSellerFeedbacks.length; i++) {
+                        var date = this.theSellerFeedbacks[i].feedbackDateTime.slice(8, 10);
+                        var month = this.theSellerFeedbacks[i].feedbackDateTime.slice(5, 7);
+                        var monthName = nameOfMonth[parseInt(month) - 1]
+                        var year = parseInt(this.theSellerFeedbacks[i].feedbackDateTime.slice(0, 4)) + 543;
+                        var time = this.theSellerFeedbacks[i].feedbackDateTime.slice(11, 16);
+                        this.theSellerFeedbacks[i].feedbackDateTime =date +" "+monthName +" "+ year;
+                    }//eloop
+                this.adm = @Html.Raw(Json.Serialize(@ViewBag.adm));
+                console.log(typeof this.adm)
+                if(this.adm != "1"){
+                    this.headers=[
+                      {text:'คนรีวิว',value:'user',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เวลาที่รีวิว',value:'feedbackDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'จำนวนดาวที่ให้',value:'feedbackStar',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'บทความรีวิว',value:'feedbackDescription',align:'left',sortable:true,class: 'white--text blue darken-2'}
+					]//eheaders
+                }//econ
+                
+                  console.log(this.theSellerFeedbacks);
+                  console.log(this.sellerId);
+                }//ecreated
+                ,
+                methods:{
+                    remove_sellerfeedback(item){
+                          if (confirm("To proceed, please click OK")) {
+                              var id = item.sellerFeedbackId;
+                              $.post( "/sellerfeedback/delete/"+item.sellerFeedbackId)
+                              .done((res)=> {
+                                  if(res.error == -1){
+                                      alert("ลบรีวิวเรียบร้อย")
+                                      location.reload();
+                                  }//endif
+
+                              })
+                              .fail(function(res) {
+                                  alert( res.msg);
+                              });
+                          } //end if 
+                    }//ef
+                    ,
+                    goLogin(){
+                        alert("กรุณาเข้าสู่ระบบก่อน")
+                    }//ef
+                    ,
+                    selfReview(){
+                        alert("ไม่สามารถรีวิวร้านของตัวเองได้")
+                    }//ef
+                    ,
+                    addReview(userId,sellerId){
+                        this.toReview.userId = userId;
+                        this.toReview.sellerId = sellerId;
+                        console.log(this.toReview);
+                        $.post("/SellerFeedback2/add",this.toReview).done(res=>{
+                            if(res.error == -1){
+                                alert("เขียนรีวิวเรียบร้อย")
+                                location.reload();
+                            }//econ
+                            else{
+                                alert(res.exception)
+                            }//econ
+                        })//epost
+                    }//ef
+
+                }//emethods
+                ,
+                computed:{
+
+                }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

@@ -1,0 +1,121 @@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb breadcrumb-arrow">
+        <li class="breadcrumb-item active" aria-current="page">sellerFeedPost</li>
+    </ol>
+</nav>
+<div id='app1' v-cloak>
+
+    <v-app>
+        <v-main>
+             <v-btn
+              class="white--text"
+              color="green darken-1"
+              @@click='add_sellerfeedpost'
+             >
+                 <v-icon>
+                   mdi-plus
+                 </v-icon>
+                 
+             </v-btn>
+			<v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search"
+                    single-line
+                    hide-details
+                ></v-text-field>
+             <v-data-table
+			 :search = 'search'
+             :headers ='headers'
+             :items   ='sellerFeedPosts'
+             :footer-props="{ 'items-per-page-options': [25, 50,100] }"
+             :items-per-page="25"
+              class='elevation-1'
+             />
+                  <template v-slot:item.actions='{item}'>
+                        <v-btn small class="white--text mr-1"color="blue darken-1"
+                        @@click="edit_sellerfeedpost(item)"
+                        >
+                            <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                        <v-btn small class="white--text"color="red darken-1"
+                        @@click="remove_sellerfeedpost(item)"
+                        >
+                            <v-icon>mdi-trash-can</v-icon>
+                        </v-btn>
+                  </template>
+             </v-data-table>
+        </v-main>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                   search :'',
+                   sellerFeedPosts:[]
+                   ,
+                   headers:[
+                      {text:'sellerFeedPost',value:'sellerFeedPostId',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'sellerId',value:'seller',align:'left',sortable:true,class: 'white--text blue darken-2'},
+
+                      {text:'รูปภาพฟีดโพสต์1',value:'feedPostPic1',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'รูปภาพฟีดโพสต์2',value:'feedPostPic2',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'รูปภาพฟีดโพสต์3',value:'feedPostPic3',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'รูปภาพฟีดโพสต์4',value:'feedPostPic4',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'รูปภาพฟีดโพสต์5',value:'feedPostPic5',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'postingDateTime',value:'postingDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'คำบรรยายฟีดโพสต์',value:'description',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'actions',value:'actions',align:'left',sortable:true,class: 'white--text blue darken-2'}
+
+					]
+                }//edata
+                ,
+                created(){
+                  this.sellerFeedPosts = @Html.Raw(Json.Serialize(@ViewBag.sellerFeedPosts));
+                }//ecreated
+                ,
+                methods:{
+                    add_sellerfeedpost(){
+                        window.location= '/sellerfeedpost/add';
+                  
+                        
+                    }//ef
+                    ,
+                    edit_sellerfeedpost(item){
+                        window.location = '/sellerfeedpost/edit/'+item.sellerFeedPostId;
+                    }
+                    ,
+                    remove_sellerfeedpost(item){
+                          if (confirm("To proceed, please click OK")) {
+                              var id = item.sellerFeedPostId;
+                              $.post( "/sellerfeedpost/delete/"+item.sellerFeedPostId)
+                              .done((res)=> {
+                                  if(res.error == -1){
+                                      this.sellerFeedPosts = this.sellerFeedPosts.filter(x=>x.sellerFeedPostId != item.sellerFeedPostId);
+                                  }//endif
+
+                              })
+                              .fail(function(res) {
+                                  alert( res.msg);
+                              });
+                          } //end if 
+                    }//ef
+
+                }//emethods
+                ,
+                computed:{
+
+                }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

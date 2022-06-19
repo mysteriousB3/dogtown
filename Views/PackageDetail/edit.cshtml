@@ -1,0 +1,89 @@
+<nav aria-label='breadcrumb'>
+    <ol class='breadcrumb breadcrumb-arrow'>
+        <li class='breadcrumb-item'><a href='/packagedetail/index'>packagedetail</a></li>
+        <li class='breadcrumb-item active' aria-current='page'>edit</li>
+    </ol>
+</nav>
+<div id='app1' v-cloak>
+
+    <v-app>
+         
+        <v-card>
+          <v-card-title>
+          </v-card-title>
+          <v-card-text>
+            <div style="margin:20px"><v-text-field  v-model="packagedetail.packageDetailName" label="ชื่อแพ็กเกจ" ></v-text-field></div>
+
+<div style="margin:20px"><v-text-field  v-model="packagedetail.totalPostOfPackage" label="จำนวนโพสต์ของแพ็กเกจ" ></v-text-field></div>
+
+<div style="margin:20px"><v-text-field  v-model="packagedetail.periodOfEachSellingPost" label="ระยะเวลาของแต่ละโพส" ></v-text-field></div>
+
+<div style="margin:20px"><v-text-field  v-model="packagedetail.totalPeriodOfPackage" label="ระยะเวลาของแพ็กเก็จ" ></v-text-field></div>
+
+<div style="margin:20px"><v-text-field  v-model="packagedetail.price" label="ราคา" ></v-text-field></div>
+
+
+          </v-card-text>
+          <v-card-actions>
+             <v-btn @@click='edit_packagedetail' color='blue' outlined>
+                <v-icon>
+                    mdi-content-save-edit
+                </v-icon>
+             </v-btn>
+          </v-card-actions>
+          
+        </v-card>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                    packagedetail:{}
+                    ,
+                    
+                }//edata
+                ,
+                created(){
+                  this.packagedetail = @Html.Raw(Json.Serialize(@ViewBag.packagedetail));
+                     
+                     
+                }//ecreated
+                ,
+                methods:{
+                  edit_packagedetail(){
+                   
+                    var url = '/packagedetail/edit';
+                    var param= this.packagedetail;
+                    $.post(url,param)
+                    .done(res =>{
+                          if(res.error == -1){
+                               window.location = '/packagedetail/index';
+                          }
+                          else{
+                             alert(res.exception);
+                          }
+                    });
+                    
+                  }//ef
+                  ,                 
+                  
+
+                }//emethod
+                ,
+                 computed:{
+                   
+
+                 }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

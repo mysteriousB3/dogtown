@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] dog7</title>
+
+    
+    
+
+    <!--boostrap-->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+
+    <!--site css-->
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/css/style.css" />
+    @* step2 add the ref css for sidebar *@
+    <link rel="stylesheet" href="~/css/sidebar.css" />
+    @* step3 add the fontawesome *@
+    <link href="https://use.fontawesome.com/releases/v5.0.6/css/all.css" rel="stylesheet">
+
+
+    <!--vuetify-->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/@@mdi/font@@4.x/css/materialdesignicons.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/vuetify@@2.x/dist/vuetify.min.css" rel="stylesheet">
+
+    @* image pop_up *@
+    @* <link rel="stylesheet" type="text/css" href="http://w2ui.com/src/w2ui-1.4.2.min.css" /> *@
+ 
+
+
+
+</head>
+<body>
+     
+    
+    <div class="page-wrapper chiller-theme toggled">
+
+       @* step1 inject the sidebar partial view right here *@
+       @await Html.PartialAsync("_SideBar")
+         
+     
+        <main class="page-content">
+            <div class="container-fluid">
+                @RenderBody()
+
+            </div>
+        </main>
+ 
+
+    </div>
+    
+  
+    <!-- jquery -->
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <!-- bootstrap -->
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!--site js-->
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/sidebar.js" asp-append-version="true"></script>
+
+
+    <!--vuejs cdn-->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
+
+    @* <script type="text/javascript" src="http://w2ui.com/src/w2ui-1.4.2.min.js"></script> *@
+
+      <!-- Prism Editor -->
+   
+
+    <!-- code mirror -->
+
+ 
+ 
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,484 @@
+<div id="app1">
+    <h1 style="text-align: center;">ยินดีต้อนรับสู่หน้าจัดการระบบ</h1><br>
+    <v-app>
+        <v-main>
+            <v-card>
+                <v-card-text>
+                    @* daily user register *@
+                    <div>
+                        <span class="h2 grey--text">รายชื่อผู้สมัครใช้งาน</span>
+                            <v-text-field
+                                    v-model="search"
+                                    append-icon="mdi-magnify"
+                                    label="Search"
+                                    single-line
+                                    hide-details
+                                ></v-text-field>
+                            <v-data-table
+                            group-desc
+                            :search = 'search'
+                            :headers ='headers'
+                            group-by="userRegistrationDateTime"
+                            :items   ='user'
+                            :footer-props="{ 'items-per-page-options': [25, 50,100] }"
+                            :items-per-page="25"
+                            class='elevation-1'
+                            />
+                                <template v-slot:item.actions='{item}'>
+                                        <v-btn small class="white--text mr-1"color="blue darken-1"
+                                        @@click="edit_theuser(item)"
+                                        >
+                                            <v-icon>mdi-pencil</v-icon>
+                                        </v-btn>
+                                        <v-btn small class="white--text"color="red darken-1"
+                                        @@click="remove_theuser(item)"
+                                        >
+                                            <v-icon>mdi-trash-can</v-icon>
+                                        </v-btn>
+                                </template>
+                            </v-data-table>
+                    </div><br><br><br>
+
+                    @* daily seller register *@
+                    <div>
+                        <span class="h2 grey--text">รายชื่อผู้สมัครเปิดเป็นร้านค้า</span>
+                            <v-text-field
+                                v-model="searchS"
+                                append-icon="mdi-magnify"
+                                label="Search"
+                                single-line
+                                hide-details
+                            ></v-text-field>
+                        <v-data-table
+                        :search = 'searchS'
+                        :headers ='headersS'
+                        :items   ='sellers'
+                        group-by = "sellerRegistrationDateTime"
+                        :footer-props="{ 'items-per-page-options': [25, 50,100] }"
+                        :items-per-page="25"
+                        class='elevation-1'
+                        />
+                        <template v-slot:item.actions2='{item}'>
+                            <img :src="item.sellerIdCardFront" width="100px" />
+                        </template>
+                        <template v-slot:item.actions3='{item}'>
+                            <img :src="item.sellerIdCardBack" width="100px" />
+                        </template>
+                        <template v-slot:item.actions4='{item}'>>
+                            <img :src="item.selllerBookBankAccountPic" width="100px" />
+                        </template>
+                        <template v-slot:item.actions5='{item}'>
+                            <img :src="item.sellerFarmRegisterPic" width="100px" /> 
+                        </template>
+                            <template v-slot:item.actions='{item}'>
+                                    <v-btn small class="white--text mr-1"color="blue darken-1"
+                                    @@click="edit_seller(item)"
+                                    >
+                                        <v-icon>mdi-pencil</v-icon>
+                                    </v-btn>
+                                    <v-btn small class="white--text"color="red darken-1"
+                                    @@click="remove_seller(item)"
+                                    >
+                                        <v-icon>mdi-trash-can</v-icon>
+                                    </v-btn>
+                            </template>
+                        </v-data-table>
+                    </div><br><br><br>
+
+                    @* daily seller feedback *@
+                    <div>
+                        <span class="h2 grey--text">การรีวิวผู้ขายจากผู้ใช้งาน</span>
+                            <v-text-field
+                                v-model="searchSF"
+                                append-icon="mdi-magnify"
+                                label="Search"
+                                single-line
+                                hide-details
+                            ></v-text-field>
+                        <v-data-table
+                        :search = 'searchSF'
+                        :headers ='headersSF'
+                        group-by="feedbackDateTime"
+                        :items   ='sellerFeedbacks'
+                        :footer-props="{ 'items-per-page-options': [25, 50,100] }"
+                        :items-per-page="25"
+                        class='elevation-1'
+                        />
+                            <template v-slot:item.actions='{item}'>
+                                    <v-btn small class="white--text"color="red darken-1"
+                                    @@click="remove_sellerfeedback(item)"
+                                    >
+                                        <v-icon>mdi-trash-can</v-icon>
+                                    </v-btn>
+                            </template>
+                        </v-data-table>
+                    </div><br><br><br>
+
+                    @* Top 10 current sellingPost by like *@
+                    <div>
+                        <span class="h1 grey--text">โพสต์ที่ได้รับไลค์มากที่สุดในเวลานี้</span>
+                        <v-text-field v-model="searchSP" append-icon="mdi-magnify" label="Search" single-line hide-details></v-text-field>
+                        <v-data-table :search='searchSP' :headers='headersSP' :items='sellingPosts'
+                            :footer-props="{ 'items-per-page-options': [25, 50,100] }" :items-per-page="25" class='elevation-1' />
+                        <template v-slot:item.actions7='{item}'>
+                            <img :src="item.sellingPostPic1" width="150px" />
+                            
+                        </template>
+                        <template v-slot:item.actions8='{item}'>
+                                            <v-btn large class="white--text mr-1"color="blue darken-1"
+                                            @@click="exploreSellingPost(item)"
+                                            >
+                                                <v-icon>mdi-magnify</v-icon>
+                                            </v-btn>
+                                    </template>
+                        </v-data-table>
+                    </div><br><br><br>
+
+                    @* revenue report *@
+                    <div>
+                        <span class="h1">ประวัติการซื้อแพ็คเกจและได้รับการอนุมัติ</span><br><br>
+                        <span class="h4 grey--text">รายได้วันนี้: {{totalPackageToday}}</span> <span style="margin-left: 20px;" class="h4 grey--text">รายได้ทั้งหมด: {{totalPackage}}</span>
+                        <div v-for="i in sellerPackages3">
+                            <span class="h6 grey--text"> แพ็คเกจ: {{i.name}} จำนวน: {{i.count}} รายได้ทั้งหมด: {{i.total}}</span>
+                        </div>
+                        <v-text-field
+                                v-model="searchSPK"
+                                append-icon="mdi-magnify"
+                                label="Search"
+                                single-line
+                                hide-details
+                            ></v-text-field>
+                        <v-data-table
+                        :search = 'searchSPK'
+                        :headers ='headersSPK'
+                        group-by = "packageBuyingDateTime"
+                        :items   ='sellerPackages'
+                        :footer-props="{ 'items-per-page-options': [25, 50,100] }"
+                        :items-per-page="25"
+                        class='elevation-1'
+                        />
+                        
+                        @* <template v-slot:item.actions2='{item}'>
+                            <img :src="item.paymentEvidence" width="250px" />
+                            
+                        </template>
+                            <template v-slot:item.actions='{item}'>
+                                    <v-btn small class="white--text mr-1"color="success"
+                                    @@click="Approve(item)"
+                                    >
+                                        อนุมัติ
+                                    </v-btn>
+                                    <br><br>
+                                    <v-btn small class="white--text mr-1"color="red"
+                                    @@click="notApprove(item)"
+                                    >
+                                        ไม่อนุมัติ
+                                    </v-btn>
+                            </template> *@
+                    </div>
+                </v-card-text>
+            </v-card>
+
+            @* Management Part *@
+            <br><br>
+             <v-card>
+                <v-card-text>
+                    <v-row>
+                        <span class="h2">การจัดการด้านผู้ขายหรือร้านค้า</span>
+                    </v-row>
+                    <br><br>
+                    <v-row>
+                        <v-col cols="3" align="center">
+                            <v-card>
+                                <v-card-title>
+                                    <span class="h2" style="margin:auto;">จัดการข้อมูลร้านค้าที่รอการอนุมัต</span>
+                                </v-card-title>
+
+                                <v-btn @@click='allApprovedSeller' class="btn btn-success btn-block" outlined>
+                                    <v-icon >
+                                        mdi-account
+                                    </v-icon>
+                                </v-btn>
+                            </v-card>
+                        </v-col>
+
+                        <v-col cols="3" align="center">
+                                <v-card>
+                                    <v-card-title>
+                                        <span class="h2" style="margin:auto;">จัดการรีวิวของผู้ขาย</span>
+                                    </v-card-title>
+
+                                    <v-btn @@click='manageReview' class="btn btn-success btn-block" outlined>
+                                        <v-icon>
+                                            mdi-checkbox-marked-circle
+                                        </v-icon>
+                                    </v-btn>
+                                </v-card>
+                        </v-col>
+
+                        <v-col cols="3" align="center">
+                                <v-card>
+                                    <v-card-title>
+                                        <span class="h2" style="margin:auto;">จัดการการซื้อแพ็คเกจ</span>
+                                    </v-card-title>
+
+                                    <v-btn @@click='approvePackage' class="btn btn-success btn-block" outlined>
+                                        <v-icon>
+                                            mdi-checkbox-marked-circle
+                                        </v-icon>
+                                    </v-btn>
+                                </v-card>
+                        </v-col>
+                    </v-row>
+                </v-card-text>
+            </v-card>
+            <br>
+            <v-card>
+                <v-card-text>
+                    <v-row>
+                        <span class="h2">การจัดการทั่วไป</span>
+                    </v-row>
+                    <v-row>
+                        <v-col cols="3" align="center">
+                                <v-card>
+                                    <v-card-title>
+                                        <span class="h2" style="margin:auto;">จัดการรายละเอียดเเพ็คเกจ</span>
+                                    </v-card-title>
+
+                                    <v-btn @@click='managePackageDetail' class="btn btn-success btn-block" outlined>
+                                        <v-icon>
+                                            mdi-checkbox-marked-circle
+                                        </v-icon>
+                                    </v-btn>
+                                </v-card>
+                        </v-col>
+                        <v-col cols="3" align="center">
+                                <v-card>
+                                    <v-card-title>
+                                        <span class="h2" style="margin:auto;">จัดการรายละเอียดพันธ์ุสุนัข</span>
+                                    </v-card-title>
+
+                                    <v-btn @@click='manageBreed' class="btn btn-success btn-block" outlined>
+                                        <v-icon>
+                                            mdi-checkbox-marked-circle
+                                        </v-icon>
+                                    </v-btn>
+                                </v-card>
+                        </v-col>
+                        <v-col cols="3" align="center">
+                                <v-card>
+                                    <v-card-title>
+                                        <span class="h2" style="margin:auto;">จัดการรายละเอียดเกี่ยวกับเพศของสุนัข</span>
+                                    </v-card-title>
+
+                                    <v-btn @@click='manageGender' class="btn btn-success btn-block" outlined>
+                                        <v-icon>
+                                            mdi-checkbox-marked-circle
+                                        </v-icon>
+                                    </v-btn>
+                                </v-card>
+                        </v-col>
+                    </v-row>
+                </v-card-text>
+            </v-card>
+        </v-main>
+    </v-app>
+
+    
+</div>
+@section Scripts{
+    <script>
+        var component ={
+            vuetify : new Vuetify(theme())
+            ,
+            el:"#app1"
+            ,
+            data:{
+                search :'',
+                   user:[]
+                   ,
+                   headers:[
+                      {text:'user',value:'userId',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'ชื่อจริง',value:'firstName',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'นามสกุล',value:'lastName',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เบอร์',value:'phoneNumber',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'อีเมล',value:'email',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เวลาที่สมัครเป็นผู้ใช้งาน',value:'userRegistrationDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'}
+                      @* {text:'actions',value:'actions',align:'left',sortable:true,class: 'white--text blue darken-2'} *@
+					],
+
+                    //seller
+                    sellers:[],
+                    searchS:"",
+                    headersS:[
+                      {text:'seller',value:'sellerId',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'ชื่อผู้ใช้งาน',value:'user',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เลข 13 หลัก บัตรประชาชน',value:'sellerIdCard',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'รูปภาพด้านหน้าของบัตรประชาชน',value:'actions2',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'รูปภาพด้านหลังของบัตรประชาชน',value:'actions3',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'รูปภาพสมุดบัญชีธนาคาร',value:'actions4',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'รูปภาพใบลงทะเบียนฟาร์มสุนัข',value:'actions5',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      @* {text:'จำนวนโพสมีอยู่',value:'totalPostAvailable',align:'left',sortable:true,class: 'white--text blue darken-2'}, *@
+                      {text:'เวลาในการสมัครเปิดร้าน',value:'sellerRegistrationDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เวลาในการอนุมัตโดยผู้ดูแลระบบ',value:'sellerApproveDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      @* {text:'actions',value:'actions',align:'left',sortable:true,class: 'white--text blue darken-2'} *@
+					],
+
+                    //seller feedback
+                    searchSF:'',
+                   sellerFeedbacks:[]
+                   ,
+                   headersSF:[
+                      {text:'SellerFeedback',value:'sellerFeedbackId',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'คนรีวิว',value:'user',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เวลาที่รีวิว',value:'feedbackDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'จำนวนดาวที่ให้',value:'feedbackStar',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'บทความรีวิว',value:'feedbackDescription',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'ฟาร์มที่ถูกรีวิว',value:'seller',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'actions',value:'actions',align:'left',sortable:true,class: 'white--text blue darken-2'}
+					],
+                    sellingPosts: [],
+                    searchSP: "",
+                    headersSP: [
+                        { text: 'รูปภาพยืนยัน', value: 'actions7', sortable: false, class: 'white--text blue darken-2' },
+                        { text: 'หัวข้อ', value: 'sellingPostName', align: 'left', sortable: true, class: 'white--text blue darken-2' },
+                        { text: 'เพศ', value: 'genderName', align: 'left', sortable: true, class: 'white--text blue darken-2' },
+                        { text: 'พันธุ์', value: 'breedNameThai', align: 'left', sortable: true, class: 'white--text blue darken-2' },
+                        { text: 'ราคา', value: 'price', align: 'left', sortable: true, class: 'white--text blue darken-2' },
+                        { text: 'โพสต์เมื่อวันที่', value: 'sellingPostPostingDateTime', align: 'left', sortable: true, class: 'white--text blue darken-2' },
+                        { text: 'ยอดผู้ชม', value: 'view', align: 'left', sortable: true, class: 'white--text blue darken-2' },
+                        { text: 'จำนวนคนกดไลค์', value: 'postLike', align: 'left', sortable: true, class: 'white--text blue darken-2' },
+                        {text:'ดูโพสต์',value:'actions8',align:'left',sortable:true,class: 'white--text blue darken-2'}   
+                    ]
+                    ,
+                    searchSPK :'',
+                    sellerPackages:[]
+                    ,
+                    headersSPK:[
+                        {text:'รหัสบิล',value:'sellerPackageId',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                        {text:'เลขประจำตัวผู้ขาย',value:'sellerId',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                        {text:'ชื่อฟาร์ม',value:'farmName',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                        {text:'เบอร์โทรฟาร์ม',value:'farmPhoneNumber',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                        {text:'เบอร์โทรผู้ใช้งาน',value:'phoneNumber',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                        {text:'ชื่อแพ็กเกจ',value:'packageDetail',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                        {text:'วันและเวลาที่ซื้อแพ็กเกจ',value:'packageBuyingDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                        {text:'จำนวนเงินที่ต้องชำระ',value:'totalPackagePurchase',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                        @* {text:'หลักฐานในการชำระเงิน',value:'actions2',align:'left',sortable:true,class: 'white--text blue darken-2'}, *@
+                        @* {text:'actions',value:'actions',align:'left',sortable:true,class: 'white--text blue darken-2'} *@
+                        ],
+                    totalPackageToday:0,
+                    totalPackage:0,
+                    sellerPackages3:[]
+
+
+            }//edata
+            ,
+            methods:{
+                allApprovedSeller(){
+                    location = "/Admin/ApproveSeller"
+                }//ef
+                ,
+                managePackageDetail(){
+                    location = "/PackageDetail"
+                }
+                ,
+                manageBreed(){
+                    location="/Breed"
+                }
+                ,
+                manageGender(){
+                    location="/Gender"
+                }//ef
+                ,
+                manageReview(){
+                    location="/sellerFeedback"
+                }
+                ,
+                approvePackage(){
+                    location="/Admin/ApprovePackage"
+                },
+                remove_sellerfeedback(item){
+                          if (confirm("To proceed, please click OK")) {
+                              var id = item.sellerFeedbackId;
+                              $.post( "/sellerfeedback/delete/"+item.sellerFeedbackId)
+                              .done((res)=> {
+                                  if(res.error == -1){
+                                      this.sellerFeedbacks = this.sellerFeedbacks.filter(x=>x.sellerFeedbackId != item.sellerFeedbackId);
+                                  }//endif
+
+                              })
+                              .fail(function(res) {
+                                  alert( res.msg);
+                              });
+                          } //end if 
+                }//ef
+                ,
+                exploreSellingPost(item){
+                    location = "/SellingPost2/ExploreSellingPost/"+item.sellingPostId;
+                }//ef
+                ,
+            }//emethods
+            ,
+            created(){
+                //===== user =====
+                this.user = @Html.Raw(Json.Serialize(@ViewBag.user));
+                //split the time of user
+                for(var i of this.user){
+                    i.userRegistrationDateTime = i.userRegistrationDateTime.split("T")[0]
+                }
+
+                // ===== seller =====
+                this.sellers = @Html.Raw(Json.Serialize(@ViewBag.sellers));
+                for(var i of this.sellers){
+                    i.sellerRegistrationDateTime = i.sellerRegistrationDateTime.split("T")[0]
+                }
+                
+                // ===== seller feedback =====
+                this.sellerFeedbacks = @Html.Raw(Json.Serialize(@ViewBag.sellerFeedbacks));
+                for(var i of this.sellerFeedbacks){
+                    i.feedbackDateTime = i.feedbackDateTime.split("T")[0]
+                }
+                
+                this.sellingPosts = @Html.Raw(Json.Serialize(@ViewBag.sellingPosts));
+                var nameOfMonth = ['มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน', 'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤษจิกายน', 'ธันวาคม'];
+                for (var i = 0; i < this.sellingPosts.length; i++) {
+                    var date = this.sellingPosts[i].sellingPostPostingDateTime.slice(8, 10);
+                    var month = this.sellingPosts[i].sellingPostPostingDateTime.slice(5, 7);
+                    var monthName = nameOfMonth[parseInt(month) - 1]
+                    var year = parseInt(this.sellingPosts[i].sellingPostPostingDateTime.slice(0, 4)) + 543;
+                    var time = this.sellingPosts[i].sellingPostPostingDateTime.slice(11, 16);
+                    this.sellingPosts[i].sellingPostPostingDateTime = date + " " + monthName + " " + year;
+                }//eloop
+                //edit price and add image
+                internationalNumberFormat = new Intl.NumberFormat('en-US');
+                for (var i of this.sellingPosts) {
+                    //price
+                    i.price = internationalNumberFormat.format(i.price) + " บาท";
+
+                    //image
+                    i.sellingPostPic1 = "/sellingPostPic/" + i.sellingPostId + "sellingPostPic1.png"
+                }//eloop
+
+                this.sellerPackages = @Html.Raw(Json.Serialize(@ViewBag.sellerPackages));
+                for(var i of this.sellerPackages){
+                    i.packageBuyingDateTime = i.packageBuyingDateTime.split("T")[0]
+                }
+                
+                this.totalPackageToday = @Html.Raw(Json.Serialize(@ViewBag.totalPackageToday));
+                this.totalPackage = @Html.Raw(Json.Serialize(@ViewBag.totalPackage));
+
+                internationalNumberFormat = new Intl.NumberFormat('en-US');
+                this.totalPackageToday = internationalNumberFormat.format(this.totalPackageToday) + " บาท";
+                this.totalPackage = internationalNumberFormat.format(this.totalPackage) + " บาท";
+
+                this.sellerPackages3 = @Html.Raw(Json.Serialize(@ViewBag.sellerPackages3));
+                for(var i of this.sellerPackages3){
+                    i.total= internationalNumberFormat.format(i.total)+ " บาท"
+                }
+                console.log(this.sellerPackages3);
+
+            }//ecreated
+        }//ecomponent
+        var app = new Vue(component);
+    </script>
+}

@@ -1,0 +1,228 @@
+<nav aria-label='breadcrumb'>
+    <ol class='breadcrumb breadcrumb-arrow'>
+        <li class='breadcrumb-item'><a href='/seller/index'>seller</a></li>
+        <li class='breadcrumb-item active' aria-current='page'>create</li>
+    </ol>
+</nav>
+<div id='app1' v-cloak>
+
+    <v-app>
+         
+        <v-card>
+          <v-card-title>
+          </v-card-title>
+          <v-card-text>
+            <div style="margin:20px">
+<v-select return-object
+		  outlined
+          v-model="select_user"
+          :items="users"
+          item-text='value'
+          menu-props="auto"
+          label="ชื่อผู้ใช้งาน"
+          show="firstName&lastName" 
+           
+  ></v-select>
+</div>
+
+<div style="margin:20px"><v-text-field  v-model="seller.sellerIdCard" label="เลข 13 หลัก บัตรประชาชน" ></v-text-field></div>
+
+<v-col cols="3">
+  <v-card>
+    <v-card-text>
+     <v-img :src="sellerIdCardFrontData"   ></v-img>
+    </v-card-text>
+    <v-card-actions>
+      <v-file-input label="รูปภาพด้านหน้าของบัตรประชาชน" v-model="sellerIdCardFront" @@change="preview_sellerIdCardFront"  ></v-file-input>
+    </v-card-actions>
+  </v-card>
+ 
+</v-col>
+ 
+
+<v-col cols="3">
+  <v-card>
+    <v-card-text>
+     <v-img :src="sellerIdCardBackData"   ></v-img>
+    </v-card-text>
+    <v-card-actions>
+      <v-file-input label="รูปภาพด้านหลังของบัตรประชาชน" v-model="sellerIdCardBack" @@change="preview_sellerIdCardBack"  ></v-file-input>
+    </v-card-actions>
+  </v-card>
+ 
+</v-col>
+ 
+
+<v-col cols="3">
+  <v-card>
+    <v-card-text>
+     <v-img :src="selllerBookBankAccountPicData"   ></v-img>
+    </v-card-text>
+    <v-card-actions>
+      <v-file-input label="รูปภาพสมุดบัญชีธนาคาร" v-model="selllerBookBankAccountPic" @@change="preview_selllerBookBankAccountPic"  ></v-file-input>
+    </v-card-actions>
+  </v-card>
+ 
+</v-col>
+ 
+
+<v-col cols="3">
+  <v-card>
+    <v-card-text>
+     <v-img :src="sellerFarmRegisterPicData"   ></v-img>
+    </v-card-text>
+    <v-card-actions>
+      <v-file-input label="รูปภาพใบลงทะเบียนฟาร์มสุนัข" v-model="sellerFarmRegisterPic" @@change="preview_sellerFarmRegisterPic"  ></v-file-input>
+    </v-card-actions>
+  </v-card>
+ 
+</v-col>
+ 
+
+<div style="margin:20px"><v-text-field  v-model="seller.totalPostAvailable" label="จำนวนโพสมีอยู่" ></v-text-field></div>
+
+ <v-date-picker
+      v-model="seller.sellerRegistrationDateTime"
+      class="mt-4"
+      
+      
+></v-date-picker>
+
+
+          </v-card-text>
+          <v-card-actions>
+             <v-btn @@click='add_seller' color='blue' outlined>
+                <v-icon>
+                    mdi-content-save-edit
+                </v-icon>
+             </v-btn>
+          </v-card-actions>
+          
+        </v-card>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                    seller:{}
+                    ,
+                    users:[] ,
+select_user:{},
+sellerIdCardFrontData:'',
+				sellerIdCardFront:[],
+
+sellerIdCardBackData:'',
+				sellerIdCardBack:[],
+
+selllerBookBankAccountPicData:'',
+				selllerBookBankAccountPic:[],
+
+sellerFarmRegisterPicData:'',
+				sellerFarmRegisterPic:[],
+
+
+                }//edata
+                ,
+                created(){
+                     
+//=== begin user ===
+this.users = @Html.Raw(Json.Serialize(@ViewBag.users));
+this.select_user = this.users[0];
+//=== begin user ===
+
+
+                }//ecreated
+                ,
+                methods:{
+                  add_seller(){
+                   									this.seller.appUserId = this.select_appUser.appUserId;
+
+this.seller.sellerIdCardFront = this.sellerIdCardFrontData;
+this.seller.sellerIdCardBack = this.sellerIdCardBackData;
+this.seller.selllerBookBankAccountPic = this.selllerBookBankAccountPicData;
+this.seller.sellerFarmRegisterPic = this.sellerFarmRegisterPicData;
+
+                    var url = '/seller/add';
+                    var param= this.seller;
+                    $.post(url,param)
+                    .done(res =>{
+              			  //console.log(res);return;
+                          if(res.error == -1){
+                               window.location = '/seller/index';
+                          }
+                          else{
+                             alert(res.exception);
+                          }
+                    });
+					
+                    
+                  }//ef
+                  ,
+                  preview_sellerIdCardFront(){
+ 						const reader = new FileReader();
+                		reader.readAsDataURL(this.sellerIdCardFront); //file1
+                		reader.onload = () => {
+                			this.sellerIdCardFrontData = reader.result; //imageData
+                		}//ev
+                		reader.onerror = function (error) {
+                			console.log('Error: ', error)
+                		}//ev
+
+                  }//ef    
+                  ,
+preview_sellerIdCardBack(){
+ 						const reader = new FileReader();
+                		reader.readAsDataURL(this.sellerIdCardBack); //file1
+                		reader.onload = () => {
+                			this.sellerIdCardBackData = reader.result; //imageData
+                		}//ev
+                		reader.onerror = function (error) {
+                			console.log('Error: ', error)
+                		}//ev
+
+                  }//ef    
+                  ,
+preview_selllerBookBankAccountPic(){
+ 						const reader = new FileReader();
+                		reader.readAsDataURL(this.selllerBookBankAccountPic); //file1
+                		reader.onload = () => {
+                			this.selllerBookBankAccountPicData = reader.result; //imageData
+                		}//ev
+                		reader.onerror = function (error) {
+                			console.log('Error: ', error)
+                		}//ev
+
+                  }//ef    
+                  ,
+preview_sellerFarmRegisterPic(){
+ 						const reader = new FileReader();
+                		reader.readAsDataURL(this.sellerFarmRegisterPic); //file1
+                		reader.onload = () => {
+                			this.sellerFarmRegisterPicData = reader.result; //imageData
+                		}//ev
+                		reader.onerror = function (error) {
+                			console.log('Error: ', error)
+                		}//ev
+
+                  }//ef    
+                  ,
+
+
+                }//emethod
+                ,
+                 computed:{
+
+                 }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

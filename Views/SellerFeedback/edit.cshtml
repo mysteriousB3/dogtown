@@ -1,0 +1,130 @@
+<nav aria-label='breadcrumb'>
+    <ol class='breadcrumb breadcrumb-arrow'>
+        <li class='breadcrumb-item'><a href='/sellerfeedback/index'>sellerfeedback</a></li>
+        <li class='breadcrumb-item active' aria-current='page'>edit</li>
+    </ol>
+</nav>
+<div id='app1' v-cloak>
+
+    <v-app>
+         
+        <v-card>
+          <v-card-title>
+          </v-card-title>
+          <v-card-text>
+            <div style="margin:20px">
+<v-select return-object
+		  outlined
+          v-model="select_user"
+          :items="users"
+          item-text='value'
+          menu-props="auto"
+          label="คนรีวิว"
+          show="firstName&lastName" 
+           
+  ></v-select>
+</div>
+
+ @* <v-date-picker
+      v-model="sellerfeedback.feedbackDateTime"
+      class="mt-4"
+      
+      
+></v-date-picker> *@
+
+<div style="margin:20px"><v-text-field  v-model="sellerfeedback.feedbackStar" label="จำนวนดาวที่ให้" ></v-text-field></div>
+
+<div style="margin:20px"><v-text-field  v-model="sellerfeedback.feedbackDescription" label="บทความรีวิว" ></v-text-field></div>
+
+<div style="margin:20px">
+<v-select return-object
+		  outlined
+          v-model="select_seller"
+          :items="sellers"
+          item-text='value'
+          menu-props="auto"
+          label="ฟาร์มที่ถูกรีวิว"
+          show="sellerId&farmName" 
+           
+  ></v-select>
+</div>
+
+
+          </v-card-text>
+          <v-card-actions>
+             <v-btn @@click='edit_sellerfeedback' color='blue' outlined>
+                <v-icon>
+                    mdi-content-save-edit
+                </v-icon>
+             </v-btn>
+          </v-card-actions>
+          
+        </v-card>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                    sellerfeedback:{}
+                    ,
+                    users:[] ,
+select_user:{},
+sellers:[] ,
+select_seller:{},
+
+                }//edata
+                ,
+                created(){
+                  this.sellerfeedback = @Html.Raw(Json.Serialize(@ViewBag.sellerfeedback));
+                     this.users = @Html.Raw(Json.Serialize(@ViewBag.users));
+this.select_user = @Html.Raw(Json.Serialize(@ViewBag.select_user));
+
+this.sellers = @Html.Raw(Json.Serialize(@ViewBag.sellers));
+this.select_seller = @Html.Raw(Json.Serialize(@ViewBag.select_seller));
+
+
+                     
+                }//ecreated
+                ,
+                methods:{
+                  edit_sellerfeedback(){
+                   									this.sellerfeedback.userId = this.select_user.id;
+
+									this.sellerfeedback.sellerId = this.select_seller.sellerId;
+
+
+                    var url = '/sellerfeedback/edit';
+                    var param= this.sellerfeedback;
+                    $.post(url,param)
+                    .done(res =>{
+                          if(res.error == -1){
+                               window.location = '/sellerfeedback/index';
+                          }
+                          else{
+                             alert(res.exception);
+                          }
+                    });
+                    
+                  }//ef
+                  ,                 
+                  
+
+                }//emethod
+                ,
+                 computed:{
+                   
+
+                 }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

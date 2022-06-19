@@ -1,0 +1,244 @@
+<div id="app1">
+    <v-app>
+        <v-main>
+            <v-container>
+                <v-col cols="8">
+                    <div style="text-align: center;">
+                        <span  class="h1 grey--text">นโยบาย</span>
+                    </div>
+                    <br>
+                        <ul class="grey--text h6">
+                            <li>การแก้ไขข้อมูลจะต้องรอ 15 วันหลังจากแก้ไข</li>
+                            <li>การแก้ไขรหัสผ่านจะต้องรอ 30 วันหลังจากแก้ไข</li>
+                        </ul>
+                    <br>
+                    
+                    <v-card>
+                        <v-card-title >
+                            <span style="margin: auto;" class="h2 grey--text">ข้อมูลผู้ใช้</span>
+                        </v-card-title>
+                        <div style="margin: 0 0 0 30px;">
+                            <span class="h4 grey--text">ชื่อ:</span>
+                            <input class="h4 grey--text inFo" disabled v-model="user.firstName">
+                        </div>
+                        <div style="margin: 0 0 0 30px;">
+                            <span class="h4 grey--text">นามสกุล:</span>
+                            <input class="h4 grey--text inFo" disabled v-model="user.lastName">
+                        </div>
+                        <div style="margin: 0 0 0 30px;">
+                            <span class="h4 grey--text">อีเมล:</span>
+                            <span id="emailCheck" class="red--text"></span>
+                            <input class="h4 grey--text inFo" disabled v-model="user.email">
+                        </div>
+                        <div style="margin: 0 0 0 30px;">
+                            <span class="h4 grey--text">เบอร์:</span>
+                            <span id="phoneNumberCheck" class="red--text"></span>
+                            <input class="h4 grey--text inFo" disabled v-model="user.phoneNumber">
+                        </div>
+                        <div style="text-align: center;">
+                            <input v-if="pullButtonInfo == 1" style="margin: 10px 10px;" type="button"  class="btn btn-danger white--text btn-large col-5" value="ยกเลิกการแก้ไข้ข้อมูล" @@click="cancelInfo();">
+                            <input v-if="pullButtonInfo == 1" style="margin: 10px 10px;" type="button" class="btn btn-success white--text btn-large col-5" value="ยืนยันการแก้ไขข้อมูล" @@click="confirmInfo();">
+
+                            @* original button *@
+                            <input v-if="pullButtonInfo == 0" id="changeInfo" style="margin: 10px 10px;" type="button" class="btn success white--text btn-large col-5" value="แก้ไขข้อมูล" @@click="changeInFo2();">
+                            <input v-if="pullButtonInfo == 0" style="margin: 10px 10px;" type="button" class="btn success white--text btn-large col-5" value="แก้ไขรหัสผ่าน" @@click="changePassword()">
+                            <br>
+                            <input  style="margin: 10px 10px;" type="button" class="btn red white--text btn-large col-5" value="ยกเลิกบัญชีผู้ใช้งาน" @@click="deactivateUser()">
+                        </div>
+                    </v-card>
+                </v-col>
+            </v-container>
+        </v-main>
+    </v-app>
+</div>
+@section Scripts{
+    <script>
+        var component ={
+            vuetify : new Vuetify(theme())
+            ,
+            el:"#app1"
+            ,
+            data:{
+                user:{},
+                today:"",
+
+                eInfo:"",
+                ePass:"",
+
+                cInfo:"",
+                cPass:"",
+
+                pullButtonInfo:0,
+
+                //original content
+                oF:"",
+                oL:"",
+                oE:"",
+                oP:"",
+
+                pass1:0,
+                pass6:0
+            }//edata
+            ,
+            methods:{
+                //to pull button to edit info
+                changeInFo2(){
+                    //get all element to remove disabled
+                    var listInfo = document.querySelectorAll(".inFo")
+                    for(var i of listInfo){
+                        i.removeAttribute("disabled");
+                        i.classList.remove("grey--text");
+                        i.classList.add("bossBorder");
+                        this.pullButtonInfo = 1;
+                    }//eloop
+                }//ef
+                ,
+                //to cancel change in info
+                cancelInfo(){
+                    //first method just refresh the page
+                    @* window.location = "/TheUser2/Index/"+ this.user.id; *@
+
+                    //second method assign back to its original value
+                    this.user.lastName      = this.oL
+                    this.user.firstName     = this.oF
+                    this.user.email         = this.oE
+                    this.user.phoneNumber   = this.oP
+                    
+                    //disabled input
+                    var listInfo = document.querySelectorAll(".inFo")
+                    for(var i of listInfo){
+                        i.setAttribute("disabled","disabled");
+                        i.classList.add("grey--text");
+                        i.classList.remove("bossBorder");
+                        this.pullButtonInfo = 0;
+                    }//eloop
+                    var checkMemo = "";
+                }//ef
+                ,
+                confirmInfo(){
+                    var checkMemo = "";
+                    if(this.oF != this.user.firstName){
+                        checkMemo+= "first name "
+                    }//econ
+                    if(this.oL != this.user.lastName){
+                        checkMemo+="last name "
+                    }//econ
+                    if(this.oE != this.user.email){
+                        checkMemo+="email "
+                    }//econ
+                    if(this.oP != this.user.phoneNumber){
+                        checkMemo+="phone number"
+                    }//econ
+
+                    var sign = "@@";
+                    sign = sign[0];
+                    //check email completeness
+                    if(this.user.email.indexOf(sign)==-1){
+                        document.querySelector("#emailCheck").innerHTML="รูปแบบของอีเมลไม่ถูกต้อง";
+                        this.pass1=0;
+                    }//econ
+                    else if(this.user.email.indexOf(sign)!=-1){
+                        document.querySelector("#emailCheck").innerHTML="";
+                        this.pass1=1;
+                    }//econ
+                    if(this.user.phoneNumber == undefined || this.user.phoneNumber.length !=10){
+                        document.querySelector("#phoneNumberCheck").innerHTML="กรุณาตรวจสอบความถูกต้องหรือความสมบูรณ์ของเบอร์โทรศัพท์";
+                        this.pass6=0;
+                    }//econ
+
+                    if(this.user.phoneNumber != undefined && this.user.phoneNumber.length ==10){
+                        
+                        if(this.user.phoneNumber[0]!="0"){
+                            document.querySelector("#phoneNumberCheck").innerHTML="กรุณาตรวจสอบความถูกต้องหรือความสมบูรณ์ของเบอร์โทรศัพท์";
+                            this.pass6=0;
+                            return;
+                        }//econ
+                        this.user.phoneNumber = parseInt(this.user.phoneNumber);
+                        this.user.phoneNumber = this.user.phoneNumber.toString()
+                        
+                        if(this.user.phoneNumber=="NaN"){
+                            document.querySelector("#phoneNumberCheck").innerHTML="กรุณาตรวจสอบความถูกต้องหรือความสมบูรณ์ของเบอร์โทรศัพท์";
+                            this.pass6=0;
+                            this.user.phoneNumber = undefined;
+                        }//econ
+                        else{
+                            this.user.phoneNumber = "0" + this.user.phoneNumber.toString()
+                            document.querySelector("#phoneNumberCheck").innerHTML="";
+                            this.pass6=1;
+                        }
+                    }//econ
+                    if(this.pass1 != 1 || this.pass6 != 1){
+                        alert("ข้อมูลยังไม่ถูกต้อง")
+                        return;
+                    }//econ
+
+                    var param ={id:this.user.id,editInfoMemo:checkMemo,firstName:this.user.firstName,lastName:this.user.lastName
+                                ,email:this.user.email,phoneNumber:this.user.phoneNumber
+                    }
+                    console.log(param)
+                    $.post("/TheUser2/ConfirmInfo",param).done(res=>{
+                       alert(res.message);
+                       location = "/TheUser2"
+                    })
+
+                }//ef
+                ,
+                changePassword(){
+                    location = "/TheUser2/Changepassword/"+ this.user.id;
+                }//ef
+                ,
+                deactivateUser(){
+                    if(confirm("กด OK เพื่อยกเลิกบัญชีผู้ใช้งาน")==true){
+                        $.post("/Seller2/DeactivateUser",this.user).done(res=> {
+                            if(res.error ==-1){
+                                alert("ยกเลิกบัญชีผู้ใช้เรียบร้อย");
+                                location="/Security/logout";
+                            }
+                            else{
+                                alert(res.exception);
+                            }
+                        })
+                    }//econ
+                }//ef
+            }//emethods
+            ,
+            created(){
+                this.today  = @Html.Raw(Json.Serialize(@ViewBag.today));
+                this.user   = @Html.Raw(Json.Serialize(@ViewBag.user));
+                
+                //find differences in day between dates
+                var today = new Date(this.today);
+                var infoDate = new Date(this.user.editInfoDateTime);
+                var diffTime = Math.abs(today-infoDate);
+                this.cInfo = Math.ceil(diffTime/(1000*60*60*24));
+                console.log(this.cInfo)
+                
+                
+
+                //assign original content
+                this.oF = this.user.firstName;
+                this.oL = this.user.lastName;
+                this.oE = this.user.email;
+                this.oP = this.user.phoneNumber;
+                console.log(this.user)
+            }//ecreated
+            ,
+            mounted(){
+                //set the einfo to allow user to change info 15 day interval
+                if(this.user.editInfoDateTime.substr(0,4)== "0001"){
+                    this.cInfo == 16;
+                    @* document.getElementById("changeInfo").removeAttribute("disabled") *@
+                }//econ
+                else if(this.user.editInfoDateTime.substr(0,4) != "0001"){
+                    if(this.cInfo <15){
+                        document.getElementById("changeInfo").setAttribute("disabled","disabled")
+                    }
+                }//econ
+                
+                
+            }
+            
+        }//ecomponent
+        var app = new Vue(component);
+    </script>
+}

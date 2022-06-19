@@ -1,0 +1,204 @@
+
+<div id="app1">
+    <v-app>
+        <v-main>
+            <v-card>
+                <span class="h1" style="margin-left: 35%;">สมัครบัญชีผู้ใช้งาน</span>
+                <v-card-text>
+                    <div style="margin:20px">
+                        <span class="h2">อีเมล</span><v-icon id="iconEmailCheck">mdi-account</v-icon>
+                        <span style="color: red;" id=emailCheck></span>
+                        <span id="error" class="red--text"></span>
+                        <h6>อีเมลนี้จะใช้เป็น username เพื่อทำการ log-in เข้าสู่ระบบ และจะต้องเป็นตัวเลขหรือตัวอักษรภาษาอังกฤษที่ไม่ใช่ตัวอักษรพิเศษเช่น !,$,%,#,^,/,\</h6>
+                        <v-text-field v-model="theUser.Email" label="dogtown@gmail.com"></v-text-field>
+                    </div>
+
+                    <div style="margin:20px">
+                        <span class="h2">รหัสผ่าน</span>
+                        <span style="color: red;" id="passwordCheck1"></span>
+                        <h6>รหัสผ่านสามารถตั้งเป็นตัวอักษรธรรมดา ตัวเลข หรืออักษรพิเศษได้ แต่ต้องมีตัวเลขในนั้น 4 ตัวขึ้นไป</h6>
+                        <v-text-field type="password" v-model="theUser.password"></v-text-field>
+                    </div>
+
+                    <div style="margin:20px">
+                        <span class="h2">ยืนยันรหัสผ่าน</span>
+                        <span style="color: red;" id="passwordCheck2"></span>
+                        <h6>สามารถตั้งเป็นตัวเลข ตัวอักษรพิเศษ หรือตัวอักษรธรรมดาผสมกันได้</h6>
+                        <v-text-field type="password" v-model="checkPassword"></v-text-field>
+                    </div>
+
+                    <div style="margin:20px">
+                        <span class="h2">ชื่อ-นามสกุล</span>
+                        <span style="color: red;" id=nameCheck></span>
+                        <h6>กรุณากรอกชื่อและนามสกุลของท่าน</h6>
+                        <v-row>
+                            <v-col cols="6">
+                                <v-text-field v-model="theUser.firstName" label="ชื่อ"></v-text-field>
+                            </v-col>
+                            <v-col cols="6">
+                                <v-text-field v-model="theUser.lastName" label="นามสกุล"></v-text-field>
+                            </v-col>
+                        </v-row>
+                    </div>
+
+                    <div style="margin:20px">
+                        <span class="h2">เบอร์โทรศัพท์</span>
+                        <span style="color: red;" id=phoneNumberCheck></span>
+                        <h6>กรุณากรอกเบอร์มือถือของท่าน</h6>
+                        <v-text-field v-model="theUser.PhoneNumber"></v-text-field>
+                    </div>
+                    
+                    <v-btn @@click="submit">สมัคร</v-btn>
+                </v-card-text>
+            </v-card>
+            
+        </v-main>
+    </v-app>
+
+</div>
+
+
+
+
+@section scripts{
+<script>
+    var component = {
+        vuetify : new Vuetify(theme())
+        ,
+        el:"#app1",
+        data:{
+            checkPassword:"",
+            theUser:{Email:""},
+            pass1:0,
+            pass2:0,
+            pass3:0,
+            pass4:0,
+            pass5:0,
+            pass6:0,
+            error:""
+
+
+        }//edata
+        ,
+        created(){           
+        }//ecreated
+        ,
+        methods:{
+            submit(){
+                var sign = "@@";
+                sign = sign[0];
+                //check email completeness
+                if(this.theUser.Email.indexOf(sign)==-1){
+                    document.querySelector("#iconEmailCheck").classList.add("red--text");
+                    document.querySelector("#emailCheck").innerHTML="รูปแบบของอีเมลไม่ถูกต้อง";
+                    this.pass1=0;
+                }//econ
+                else if(this.theUser.Email.indexOf(sign)!=-1){
+                    document.querySelector("#iconEmailCheck").classList.remove("red--text");
+                    document.querySelector("#emailCheck").innerHTML="";
+                    this.pass1=1;
+                }//econ
+                
+                //check password completeness
+                if(this.theUser.password ==undefined || this.theUser.password =="" ){
+                    document.querySelector("#passwordCheck1").innerHTML="กรุณากรอกรหัสผ่าน";
+                    this.pass2=0;
+                }//econ
+                else if(this.theUser.password !=undefined ){
+                    document.querySelector("#passwordCheck1").innerHTML="";
+                    var set = "1234567890"
+                    var theCount = 0;
+                    for(var i of this.theUser.password){
+                        if(set.includes(i)){
+                            theCount++;
+                        }//econ
+                    }//eloop
+                    if(theCount<4){
+                        document.querySelector("#passwordCheck1").innerHTML="กรุณาเลือกใช้รหัสผ่านที่ประกอบไปด้วยตัวเลข 4 ตัวขึ้นไป";
+                        this.pass2=0;
+                        return;
+                    }
+                    this.pass2=1;
+                    
+                }//econ
+
+                //check confirm password
+                if(this.checkPassword != this.theUser.password){
+                    document.querySelector("#passwordCheck2").innerHTML="รหัสผ่านไม่ตรงกัน กรุณาเช็คความถูกต้อง";
+                    this.pass3=0;
+                }//econ
+                else if(this.checkPassword == this.theUser.password){
+                    document.querySelector("#passwordCheck2").innerHTML="";
+                    this.pass3=1;
+                }//econ
+
+                //check completeness of firstname and lastname
+                if(this.theUser.firstName == undefined || this.theUser.firstName ==""){
+                    document.querySelector("#nameCheck").innerHTML="";
+                    document.querySelector("#nameCheck").innerHTML+="กรุณากรอกชื่อ";
+                    this.pass4=0;
+                }//econ
+                else if(this.theUser.firstName != undefined && this.theUser.firstName !=""){
+                    document.querySelector("#nameCheck").innerHTML="";
+                    this.pass4=1;
+                }//econ
+
+                if(this.theUser.lastName == undefined || this.theUser.lastName ==""){
+                    document.querySelector("#nameCheck").innerHTML+=" กรุณากรอกนามสกุล";
+                    this.pass5=0;
+                }//econ
+                else if(this.theUser.lastName != undefined && this.theUser.lastName !=""){
+                    document.querySelector("#nameCheck").innerHTML="";
+                    this.pass5=1;
+                }//econ
+
+                //check phone number completeness
+                if(this.theUser.PhoneNumber == undefined || this.theUser.PhoneNumber.length !=10){
+                    document.querySelector("#phoneNumberCheck").innerHTML="กรุณาตรวจสอบความถูกต้องหรือความสมบูรณ์ของเบอร์โทรศัพท์";
+                    this.pass6=0;
+                }//econ
+                if(this.theUser.PhoneNumber != undefined && this.theUser.PhoneNumber.length ==10){
+
+                    if(this.theUser.PhoneNumber[0]!="0"){
+                        document.querySelector("#phoneNumberCheck").innerHTML="กรุณาตรวจสอบความถูกต้องหรือความสมบูรณ์ของเบอร์โทรศัพท์";
+                        this.pass6=0;
+                        return;
+                    }//econ
+                    this.theUser.PhoneNumber = parseInt(this.theUser.PhoneNumber);
+                    this.theUser.PhoneNumber = this.theUser.PhoneNumber.toString()
+                    
+                    if(this.theUser.PhoneNumber=="NaN"){
+                        document.querySelector("#phoneNumberCheck").innerHTML="กรุณาตรวจสอบความถูกต้องหรือความสมบูรณ์ของเบอร์โทรศัพท์";
+                        this.pass6=0;
+                        this.theUser.PhoneNumber = undefined;
+                    }//econ
+                    else{
+                        this.theUser.PhoneNumber = "0" + this.theUser.PhoneNumber.toString()
+                        document.querySelector("#phoneNumberCheck").innerHTML="";
+                        this.pass6=1;
+                    }
+                }//econ
+
+                //pass all completeness
+                if(this.pass1==1 && this.pass2==1 && this.pass3==1 && this.pass4==1 && this.pass5==1 && this.pass6==1){
+                    $.post("/security/register",this.theUser).done(res=>{
+                        if(res == "อีเมลซ้ำ กรุณาลองชื่ออื่นค่ะ"){
+                            document.querySelector("#error").innerHTML=res;
+                        }//econ
+                        else{
+                            alert("สมัครเป็นผู้ใช้สำเร็จ")
+                            location="/home"
+                        }
+                    })
+                    
+                }//econ                
+
+
+            }//ef
+
+        }//emethod
+    }//ecomponent
+
+    var app = new Vue(component)
+</script>
+}

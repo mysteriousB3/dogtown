@@ -1,0 +1,299 @@
+<nav aria-label='breadcrumb'>
+  <ol class='breadcrumb breadcrumb-arrow'>
+    <li class='breadcrumb-item'><a href='/sellingpost/index'>sellingpost</a></li>
+    <li class='breadcrumb-item active' aria-current='page'>create</li>
+  </ol>
+</nav>
+<div id='app1' v-cloak>
+
+  <v-app>
+
+    <v-card>
+      <v-card-title>
+      </v-card-title>
+      <v-card-text>
+        <div style="margin:20px">
+          <v-select return-object outlined v-model="select_gender" :items="genders" item-text='value' menu-props="auto"
+            label="ชื่อสายพันธ์ุ" show="genderName"></v-select>
+        </div>
+
+        <div style="margin:20px">
+          <v-select return-object outlined v-model="select_breed" :items="breeds" item-text='value' menu-props="auto"
+            label="เพศ" show="breedNameEng&breedNameThai"></v-select>
+        </div>
+
+        <div style="margin:20px">
+          <v-select return-object outlined v-model="select_seller" :items="sellers" item-text='value' menu-props="auto"
+            label="sellerId" show="farmName"></v-select>
+        </div>
+
+        <div style="margin:20px">
+          <v-text-field v-model="sellingpost.price" label="ราคา"></v-text-field>
+        </div>
+
+        <div style="margin:20px">
+          <v-text-field v-model="sellingpost.sellingPostName" label="หัวข้อโพสต์"></v-text-field>
+        </div>
+
+        <div style="margin:20px">
+          <v-text-field v-model="sellingpost.sellingPostDescription" label="คำอธิบายเพิ่มเติม"></v-text-field>
+        </div>
+
+        <v-date-picker v-model="sellingpost.dateOfBirth" class="mt-4"></v-date-picker>
+
+        <div style="margin:20px">
+          <v-text-field v-model="sellingpost.pedegree" label="สามารถออกใบเพ็ดดีกรีให้ลูกค้าได้มั้ย"></v-text-field>
+        </div>
+
+        <v-date-picker v-model="sellingpost.sellingPostPostingDateTime" class="mt-4"></v-date-picker>
+
+        <v-date-picker v-model="sellingpost.sellingPostPostExpiredDate" class="mt-4"></v-date-picker>
+
+        <div style="margin:20px">
+          <v-text-field v-model="sellingpost.postLike" label="จำนวนไลค์"></v-text-field>
+        </div>
+
+        <div style="margin:20px">
+          <v-text-field v-model="sellingpost.view" label="จำนวนครั้งที่คนเข้ามาดู"></v-text-field>
+        </div>
+
+        <v-col cols="3">
+          <v-card>
+            <v-card-text>
+              <v-img :src="sellingPostPic1Data"></v-img>
+            </v-card-text>
+            <v-card-actions>
+              <v-file-input label="รูปที่1" v-model="sellingPostPic1" @@change="preview_sellingPostPic1"></v-file-input>
+            </v-card-actions>
+          </v-card>
+
+        </v-col>
+
+
+        <v-col cols="3">
+          <v-card>
+            <v-card-text>
+              <v-img :src="sellingPostPic2Data"></v-img>
+            </v-card-text>
+            <v-card-actions>
+              <v-file-input label="รูปที่2" v-model="sellingPostPic2" @@change="preview_sellingPostPic2"></v-file-input>
+            </v-card-actions>
+          </v-card>
+
+        </v-col>
+
+
+        <v-col cols="3">
+          <v-card>
+            <v-card-text>
+              <v-img :src="sellingPostPic3Data"></v-img>
+            </v-card-text>
+            <v-card-actions>
+              <v-file-input label="รูปที่3" v-model="sellingPostPic3" @@change="preview_sellingPostPic3"></v-file-input>
+            </v-card-actions>
+          </v-card>
+
+        </v-col>
+
+
+        <v-col cols="3">
+          <v-card>
+            <v-card-text>
+              <v-img :src="sellingPostPic4Data"></v-img>
+            </v-card-text>
+            <v-card-actions>
+              <v-file-input label="รูปที่4" v-model="sellingPostPic4" @@change="preview_sellingPostPic4"></v-file-input>
+            </v-card-actions>
+          </v-card>
+
+        </v-col>
+
+
+        <v-col cols="3">
+          <v-card>
+            <v-card-text>
+              <v-img :src="sellingPostPic5Data"></v-img>
+            </v-card-text>
+            <v-card-actions>
+              <v-file-input label="รูปที่5" v-model="sellingPostPic5" @@change="preview_sellingPostPic5"></v-file-input>
+            </v-card-actions>
+          </v-card>
+        </v-col>
+
+
+        <v-date-picker v-model="sellingpost.sellingPostPicUpdateDateTime" class="mt-4"></v-date-picker>
+
+
+      </v-card-text>
+      <v-card-actions>
+        <v-btn @@click='add_sellingpost' color='blue' outlined>
+          <v-icon>
+            mdi-content-save-edit
+          </v-icon>
+        </v-btn>
+      </v-card-actions>
+
+    </v-card>
+  </v-app>
+</div>
+@section scripts{
+<script>
+  var app;
+  var component = {
+    vuetify: new Vuetify(theme())
+    ,
+    el: '#app1'
+    ,
+    data: {
+      sellingpost: {}
+      ,
+      genders: [],
+      select_gender: {},
+      breeds: [],
+      select_breed: {},
+      sellers: [],
+      select_seller: {},
+      sellingPostPic1Data: '',
+      sellingPostPic1: [],
+
+      sellingPostPic2Data: '',
+      sellingPostPic2: [],
+
+      sellingPostPic3Data: '',
+      sellingPostPic3: [],
+
+      sellingPostPic4Data: '',
+      sellingPostPic4: [],
+
+      sellingPostPic5Data: '',
+      sellingPostPic5: [],
+
+
+    }//edata
+    ,
+    created() {
+
+      //=== begin gender ===
+      this.genders = @Html.Raw(Json.Serialize(@ViewBag.genders));
+      this.select_gender = this.genders[0];
+      //=== begin gender ===
+
+
+      //=== begin breed ===
+      this.breeds = @Html.Raw(Json.Serialize(@ViewBag.breeds));
+      this.select_breed = this.breeds[0];
+      //=== begin breed ===
+
+
+      //=== begin seller ===
+      this.sellers = @Html.Raw(Json.Serialize(@ViewBag.sellers));
+      this.select_seller = this.sellers[0];
+      //=== begin seller ===
+
+
+    }//ecreated
+    ,
+    methods: {
+      add_sellingpost() {
+        this.sellingpost.genderId = this.select_gender.genderId;
+
+        this.sellingpost.breedId = this.select_breed.breedId;
+
+        this.sellingpost.sellerId = this.select_seller.sellerId;
+
+        this.sellingpost.sellingPostPic1 = this.sellingPostPic1Data;
+        this.sellingpost.sellingPostPic2 = this.sellingPostPic2Data;
+        this.sellingpost.sellingPostPic3 = this.sellingPostPic3Data;
+        this.sellingpost.sellingPostPic4 = this.sellingPostPic4Data;
+        this.sellingpost.sellingPostPic5 = this.sellingPostPic5Data;
+
+        var url = '/sellingpost/add';
+        var param = this.sellingpost;
+        $.post(url, param)
+          .done(res => {
+            //console.log(res);return;
+            if (res.error == -1) {
+              window.location = '/sellingpost/index';
+            }
+            else {
+              alert(res.exception);
+            }
+          });
+
+
+      }//ef
+      ,
+      preview_sellingPostPic1() {
+        const reader = new FileReader();
+        reader.readAsDataURL(this.sellingPostPic1); //file1
+        reader.onload = () => {
+          this.sellingPostPic1Data = reader.result; //imageData
+        }//ev
+        reader.onerror = function (error) {
+          console.log('Error: ', error)
+        }//ev
+
+      }//ef    
+      ,
+      preview_sellingPostPic2() {
+        const reader = new FileReader();
+        reader.readAsDataURL(this.sellingPostPic2); //file1
+        reader.onload = () => {
+          this.sellingPostPic2Data = reader.result; //imageData
+        }//ev
+        reader.onerror = function (error) {
+          console.log('Error: ', error)
+        }//ev
+
+      }//ef    
+      ,
+      preview_sellingPostPic3() {
+        const reader = new FileReader();
+        reader.readAsDataURL(this.sellingPostPic3); //file1
+        reader.onload = () => {
+          this.sellingPostPic3Data = reader.result; //imageData
+        }//ev
+        reader.onerror = function (error) {
+          console.log('Error: ', error)
+        }//ev
+
+      }//ef    
+      ,
+      preview_sellingPostPic4() {
+        const reader = new FileReader();
+        reader.readAsDataURL(this.sellingPostPic4); //file1
+        reader.onload = () => {
+          this.sellingPostPic4Data = reader.result; //imageData
+        }//ev
+        reader.onerror = function (error) {
+          console.log('Error: ', error)
+        }//ev
+
+      }//ef    
+      ,
+      preview_sellingPostPic5() {
+        const reader = new FileReader();
+        reader.readAsDataURL(this.sellingPostPic5); //file1
+        reader.onload = () => {
+          this.sellingPostPic5Data = reader.result; //imageData
+        }//ev
+        reader.onerror = function (error) {
+          console.log('Error: ', error)
+        }//ev
+
+      }//ef    
+      ,
+
+
+    }//emethod
+    ,
+    computed: {
+
+    }//ecomputed
+  };
+  app = new Vue(component);
+
+
+</script>
+
+}

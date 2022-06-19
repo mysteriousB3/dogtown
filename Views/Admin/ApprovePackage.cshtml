@@ -1,0 +1,112 @@
+
+<div id='app1' v-cloak>
+
+    <v-app>
+        <v-main>
+            <span class="h1">การซื้อแพ็คเกจ</span>
+			<v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search"
+                    single-line
+                    hide-details
+                ></v-text-field>
+             <v-data-table
+			 :search = 'search'
+             :headers ='headers'
+             :items   ='sellerPackages'
+             :footer-props="{ 'items-per-page-options': [25, 50,100] }"
+             :items-per-page="25"
+              class='elevation-1'
+             />
+             <template v-slot:item.actions2='{item}'>
+                <img :src="item.paymentEvidence" width="250px" />
+                
+            </template>
+                  <template v-slot:item.actions='{item}'>
+                        <v-btn small class="white--text mr-1"color="success"
+                        @@click="Approve(item)"
+                        >
+                            อนุมัติ
+                        </v-btn>
+                        <br><br>
+                        <v-btn small class="white--text mr-1"color="red"
+                        @@click="notApprove(item)"
+                        >
+                            ไม่อนุมัติ
+                        </v-btn>
+                  </template>
+             </v-data-table>
+        </v-main>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                   search :'',
+                   sellerPackages:[]
+                   ,
+                   headers:[
+                      {text:'รหัสบิล',value:'sellerPackageId',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เลขประจำตัวผู้ขาย',value:'sellerId',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'ชื่อฟาร์ม',value:'farmName',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เบอร์โทรฟาร์ม',value:'farmPhoneNumber',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เบอร์โทรผู้ใช้งาน',value:'phoneNumber',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'ชื่อแพ็กเกจ',value:'packageDetail',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'วันและเวลาที่ซื้อแพ็กเกจ',value:'packageBuyingDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'จำนวนเงินที่ต้องชำระ',value:'totalPackagePurchase',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'หลักฐานในการชำระเงิน',value:'actions2',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'actions',value:'actions',align:'left',sortable:true,class: 'white--text blue darken-2'}
+					]
+                }//edata
+                ,
+                created(){
+                  this.sellerPackages = @Html.Raw(Json.Serialize(@ViewBag.sellerPackages));
+                }//ecreated
+                ,
+                methods:{
+                    notApprove(item){
+                        @* window.location = "/Admin/notApprovePackage/"+item.sellerPackageId *@
+                        param = {sellerPackageId:item.sellerPackageId,sellerId:item.sellerId};
+                        $.post("/Admin/notApprovePackage/",param).done(res => {
+                        if (res.error == -1) {
+                            alert("ไม่อนุมัติ")
+                            window.location.reload()
+                        }
+                        else {
+                            alert(res.exception);
+                        }
+                    });
+                    }//ef
+                    ,
+                    Approve(item){
+                        @* window.location = "/Admin/notApprovePackage/"+item.sellerPackageId *@
+                        param = {sellerPackageId:item.sellerPackageId,sellerId:item.sellerId};
+                        $.post("/Admin/ApprovePackage/",param).done(res => {
+                        if (res.error == -1) {
+                            alert("อนุมัติ")
+                            window.location.reload()
+                        }
+                        else {
+                            alert(res.exception);
+                        }
+                    });
+                    }//ef            
+                }//emethods
+                ,
+                computed:{
+
+                }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

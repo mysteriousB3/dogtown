@@ -1,0 +1,123 @@
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb breadcrumb-arrow">
+        <li class="breadcrumb-item active" aria-current="page">sellerPackage</li>
+    </ol>
+</nav>
+<div id='app1' v-cloak>
+
+    <v-app>
+        <v-main>
+             <v-btn
+              class="white--text"
+              color="green darken-1"
+              @@click='add_sellerpackage'
+             >
+                 <v-icon>
+                   mdi-plus
+                 </v-icon>
+                 
+             </v-btn>
+			<v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search"
+                    single-line
+                    hide-details
+                ></v-text-field>
+             <v-data-table
+			 :search = 'search'
+             :headers ='headers'
+             :items   ='sellerPackages'
+             :footer-props="{ 'items-per-page-options': [25, 50,100] }"
+             :items-per-page="25"
+              class='elevation-1'
+             />
+                  <template v-slot:item.actions='{item}'>
+                        <v-btn small class="white--text mr-1"color="blue darken-1"
+                        @@click="edit_sellerpackage(item)"
+                        >
+                            <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                        <v-btn small class="white--text"color="red darken-1"
+                        @@click="remove_sellerpackage(item)"
+                        >
+                            <v-icon>mdi-trash-can</v-icon>
+                        </v-btn>
+                  </template>
+             </v-data-table>
+        </v-main>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                   search :'',
+                   sellerPackages:[]
+                   ,
+                   headers:[
+                      {text:'sellerPackage',value:'sellerPackageId',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'ชื่อแพ็กเกจ',value:'packageDetail',align:'left',sortable:true,class: 'white--text blue darken-2'},
+
+                      {text:'วันและเวลาที่ซื้อแพ็กเกจ',value:'packageBuyingDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'วันและเวลาที่แพ็กเกจได้รับอนุญาต',value:'packageStartingDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'วันและเวลาที่แพ็กเกจหมดอายุ',value:'packageEndingDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'จำนวนเงินที่ต้องชำระ',value:'totalPackagePurchase',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'หลักฐานในการชำระเงิน',value:'paymentEvidence',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'อนุญาตเริ่มใช้แพ็กเกจ',value:'packageStatus',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'จำนวนโพสมีอยู่',value:'totalPostAvailable',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'sellerId',value:'sellerId',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'seller',value:'seller',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'actions',value:'actions',align:'left',sortable:true,class: 'white--text blue darken-2'}
+
+					]
+                }//edata
+                ,
+                created(){
+                  this.sellerPackages = @Html.Raw(Json.Serialize(@ViewBag.sellerPackages));
+                }//ecreated
+                ,
+                methods:{
+                    add_sellerpackage(){
+                        window.location= '/sellerpackage/add';
+                  
+                        
+                    }//ef
+                    ,
+                    edit_sellerpackage(item){
+                        window.location = '/sellerpackage/edit/'+item.sellerPackageId;
+                    }
+                    ,
+                    remove_sellerpackage(item){
+                          if (confirm("To proceed, please click OK")) {
+                              var id = item.sellerPackageId;
+                              $.post( "/sellerpackage/delete/"+item.sellerPackageId)
+                              .done((res)=> {
+                                  if(res.error == -1){
+                                      this.sellerPackages = this.sellerPackages.filter(x=>x.sellerPackageId != item.sellerPackageId);
+                                  }//endif
+
+                              })
+                              .fail(function(res) {
+                                  alert( res.msg);
+                              });
+                          } //end if 
+                    }//ef
+
+                }//emethods
+                ,
+                computed:{
+
+                }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

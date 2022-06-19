@@ -1,0 +1,81 @@
+<nav aria-label='breadcrumb'>
+    <ol class='breadcrumb breadcrumb-arrow'>
+        <li class='breadcrumb-item'><a href='/gender/index'>gender</a></li>
+        <li class='breadcrumb-item active' aria-current='page'>edit</li>
+    </ol>
+</nav>
+<div id='app1' v-cloak>
+
+    <v-app>
+         
+        <v-card>
+          <v-card-title>
+          </v-card-title>
+          <v-card-text>
+            <div style="margin:20px"><v-text-field  v-model="gender.genderName" label="เพศ" ></v-text-field></div>
+
+
+          </v-card-text>
+          <v-card-actions>
+             <v-btn @@click='edit_gender' color='blue' outlined>
+                <v-icon>
+                    mdi-content-save-edit
+                </v-icon>
+             </v-btn>
+          </v-card-actions>
+          
+        </v-card>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                    gender:{}
+                    ,
+                    
+                }//edata
+                ,
+                created(){
+                  this.gender = @Html.Raw(Json.Serialize(@ViewBag.gender));
+                     
+                     
+                }//ecreated
+                ,
+                methods:{
+                  edit_gender(){
+                   
+                    var url = '/gender/edit';
+                    var param= this.gender;
+                    $.post(url,param)
+                    .done(res =>{
+                          if(res.error == -1){
+                               window.location = '/gender/index';
+                          }
+                          else{
+                             alert(res.exception);
+                          }
+                    });
+                    
+                  }//ef
+                  ,                 
+                  
+
+                }//emethod
+                ,
+                 computed:{
+                   
+
+                 }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

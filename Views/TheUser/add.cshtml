@@ -1,0 +1,99 @@
+<nav aria-label='breadcrumb'>
+    <ol class='breadcrumb breadcrumb-arrow'>
+        <li class='breadcrumb-item'><a href='/theuser/index'>theuser</a></li>
+        <li class='breadcrumb-item active' aria-current='page'>create</li>
+    </ol>
+</nav>
+<div id='app1' v-cloak>
+
+    <v-app>
+         
+        <v-card>
+          <v-card-title>
+          </v-card-title>
+          <v-card-text>
+            <div style="margin:20px"><v-text-field  v-model="theuser.firstName" label="ชื่อจริง" ></v-text-field></div>
+
+<div style="margin:20px"><v-text-field  v-model="theuser.lastName" label="นามสกุล" ></v-text-field></div>
+
+<div style="margin:20px"><v-text-field  v-model="theuser.PhoneNumber" label="เบอร์" ></v-text-field></div>
+
+<div style="margin:20px"><v-text-field  v-model="theuser.Email" label="อีเมล" ></v-text-field></div>
+
+ <v-date-picker
+      v-model="theuser.userRegistrationDateTime"
+      class="mt-4"
+      
+      
+></v-date-picker>
+
+<div style="margin:20px"><v-text-field  v-model="theuser.otp" label="otp" ></v-text-field></div>
+
+<div style="margin:20px"><v-text-field  v-model="theuser.isSeller" label="เป็นผู้ขายหรือยัง" ></v-text-field></div>
+
+<div style="margin:20px"><v-text-field  v-model="theuser.password" label="รหัสผ่าน" ></v-text-field></div>
+
+
+          </v-card-text>
+          <v-card-actions>
+             <v-btn @@click='add_theuser' color='blue' outlined>
+                <v-icon>
+                    mdi-content-save-edit
+                </v-icon>
+             </v-btn>
+          </v-card-actions>
+          
+        </v-card>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                    theuser:{}
+                    ,
+                    
+                }//edata
+                ,
+                created(){
+                     
+                }//ecreated
+                ,
+                methods:{
+                  add_theuser(){
+                   
+                    var url = '/theuser/add';
+                    var param= this.theuser;
+                    $.post(url,param)
+                    .done(res =>{
+              			  //console.log(res);return;
+                          if(res.error == -1){
+                               window.location = '/theuser/index';
+                          }
+                          else{
+                             alert(res.exception);
+                          }
+                    });
+					
+                    
+                  }//ef
+                  ,
+                  
+
+                }//emethod
+                ,
+                 computed:{
+
+                 }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

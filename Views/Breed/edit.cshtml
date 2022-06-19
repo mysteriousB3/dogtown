@@ -1,0 +1,117 @@
+<nav aria-label='breadcrumb'>
+    <ol class='breadcrumb breadcrumb-arrow'>
+        <li class='breadcrumb-item'><a href='/breed/index'>breed</a></li>
+        <li class='breadcrumb-item active' aria-current='page'>edit</li>
+    </ol>
+</nav>
+<div id='app1' v-cloak>
+
+    <v-app>
+         
+        <v-card>
+          <v-card-title>
+          </v-card-title>
+          <v-card-text>
+            <div style="margin:20px"><v-text-field  v-model="breed.breedNameThai" label="ชื่อสายพันธุ์ภาษาไทย" ></v-text-field></div>
+
+<div style="margin:20px"><v-text-field  v-model="breed.breedNameEng" label="ชื่อสายพันธุ์ภาษาอังกฤษ" ></v-text-field></div>
+
+<v-col cols="3">
+  <v-card>
+    <v-card-text>
+     <v-img :src="breedPicData"   ></v-img>
+    </v-card-text>
+    <v-card-actions>
+      <v-file-input label="รูปสายพันธ์ุ" v-model="breedPic" @@change="preview_breedPic"  ></v-file-input>
+    </v-card-actions>
+  </v-card>
+ 
+</v-col>
+ 
+
+<div style="margin:20px"><v-text-field  v-model="breed.breedDescription" label="คำอธิบายสายพันธ์" ></v-text-field></div>
+
+<div style="margin:20px"><v-text-field  v-model="breed.total" label="จำนวนทั้งหมด" ></v-text-field></div>
+
+
+          </v-card-text>
+          <v-card-actions>
+             <v-btn @@click='edit_breed' color='blue' outlined>
+                <v-icon>
+                    mdi-content-save-edit
+                </v-icon>
+             </v-btn>
+          </v-card-actions>
+          
+        </v-card>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                    breed:{}
+                    ,
+                    breedPicData:'',
+				breedPic:[],
+
+
+                }//edata
+                ,
+                created(){
+                  this.breed = @Html.Raw(Json.Serialize(@ViewBag.breed));
+                     this.breedPicData ="/dogPic/"+this.breed.breedId+"breedPic.png";
+
+                     
+                }//ecreated
+                ,
+                methods:{
+                  edit_breed(){
+                   this.breed.breedPic = this.breedPicData;
+
+                    var url = '/breed/edit';
+                    var param= this.breed;
+                    $.post(url,param)
+                    .done(res =>{
+                          if(res.error == -1){
+                               window.location = '/breed/index';
+                          }
+                          else{
+                             alert(res.exception);
+                          }
+                    });
+                    
+                  }//ef
+                  ,                 
+                  preview_breedPic(){
+ 						const reader = new FileReader();
+                		reader.readAsDataURL(this.breedPic); //file1
+                		reader.onload = () => {
+                			this.breedPicData = reader.result; //imageData
+                		}//ev
+                		reader.onerror = function (error) {
+                			console.log('Error: ', error)
+                		}//ev
+
+                  }//ef    
+                  ,
+
+
+                }//emethod
+                ,
+                 computed:{
+                   
+
+                 }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

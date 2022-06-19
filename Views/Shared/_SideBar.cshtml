@@ -1,0 +1,256 @@
+   @using Microsoft.AspNetCore.Identity
+   @using dog7.Data
+   @inject SignInManager<AppUser> signInManager
+   @inject UserManager<AppUser> userManager
+   @inject dog7DbContext _context
+   @using System.Linq
+   @using Microsoft.EntityFrameworkCore;
+   
+   <a id="show-sidebar" class="btn btn-sm btn-dark" href="#">
+       <i class="fas fa-bars"></i>
+   </a>
+   <nav id="sidebar" class="sidebar-wrapper">
+       <!-- sidebar content -->
+       <div class="sidebar-content">
+           <!-- sidebar brand -->
+           <div class="sidebar-brand">
+               <a href="/home">dogTown ชุมชนคนรักหมา</a>
+               <div id="close-sidebar">
+                   <i class="fas fa-times"></i>
+               </div>
+           </div>
+           <!-- sidebar user profile -->
+           <div class="sidebar-header">
+               <div class="user-pic">
+                   <img class="img-responsive img-rounded"
+                       src="https://w0.peakpx.com/wallpaper/864/627/HD-wallpaper-personal-bubble-boy-shellz-art-anime-blue-brown-cartoon-cheap-child-cover-cute-face-guy-hair-hoodie-icon-id-identity-kawaii-kid-male-manga-persona-profile-self-sweet.jpg">
+               </div>
+               <div class="user-info">
+                   @if (signInManager.IsSignedIn(User)){
+                       //let get first name and last name from user
+                       var user = userManager.GetUserAsync(User).Result;
+                       string firstName = user.firstName;
+                       string lastName = user.lastName;
+                       int getIsShop = user.isSeller;
+                       //get the role
+                       var role = userManager.GetRolesAsync(user).Result[0];           
+                       <span class="user-name"> @firstName
+                       <strong>@lastName</strong>
+                        </span>
+                        @if(getIsShop == 0 || getIsShop <-1){
+                            var isShop = "ผู้ใช้งานทั่วไป";
+                            <span class="user-role">@role @isShop </span>
+                       }
+                       else if(getIsShop == -1){
+                           var isShop = "รอดำเนินการเปิดร้าน";
+                           <span class="user-role">@role @isShop </span>
+                       }
+                       else{
+                           var isShop = "ผู้ขาย";
+                           <span class="user-role">@role @isShop </span>
+                       }   
+                   }
+                   else{                 
+                        <a class="btn btn-success" href="/security/login">เข้าสู่ระบบเลย !</a> 
+                   }
+                   <span class="user-status">
+                       <i class="fa fa-circle"></i>
+                       <span>กำลังใช้งาน</span>
+                   </span>
+               </div>
+           </div>
+           <!-- sidebar-search  -->
+           <div class="sidebar-search">
+               <div>
+                   <div class="input-group">
+                       <input type="text" class="form-control search-menu" placeholder="Search...">
+                       <div class="input-group-append">
+                           <span class="input-group-text">
+                               <i class="fa fa-search" aria-hidden="true"></i>
+                           </span>
+                       </div>
+                   </div>
+               </div>
+           </div>
+           <!-- sidebar-menu  -->
+           <div class="sidebar-menu">
+               <ul>
+                   <li class="header-menu">
+                       <span>ทั่วไป</span>
+                   </li>
+                   
+                @if (signInManager.IsSignedIn(User)){
+                    //let get first name and last name from user
+                    var user = userManager.GetUserAsync(User).Result;
+                    var isShop = user.isSeller;
+                    
+                    @if(isShop == 0|| isShop==-2){
+                        var oldSeller = await _context.Seller.Where(x=>x.userId == user.Id).CountAsync();
+                        if(oldSeller == 1){
+                            var seller = await _context.Seller.FirstOrDefaultAsync(x=>x.userId == user.Id);
+                            var cHref = "/Seller2/ReOpen/";
+                            <li class="sidebar-dropdown">
+                                <a href="@cHref">
+                                <i class="fas fa-paw"></i>
+                                <span>ร้านของฉัน</span>
+                                <span class="badge badge-pill badge-warning">กลับมาเปิดร้าน</span>
+                                </a>
+                            </li>
+                        }//econ
+                        else if(oldSeller != 1){
+                            <li class="sidebar-dropdown">
+                                <a href="/seller2/openshop">
+                                <i class="fas fa-paw"></i>
+                                <span>ร้านของฉัน</span>
+                                <span class="badge badge-pill badge-warning">เปิดร้านเลย!</span>
+                                </a>
+                            </li>
+                        }
+                        @* else{
+                            <li class="sidebar-dropdown">
+                                <a href="/seller2/openshop">
+                                <i class="fas fa-paw"></i>
+                                <span>ร้านของฉัน</span>
+                                <span class="badge badge-pill badge-warning">เปิดร้านเลย!</span>
+                                </a>
+                            </li>
+                        }//econ *@
+                    }//econ
+                    else if(isShop == -1){
+                        <li class="sidebar-dropdown">
+                            <a href="/home">
+                            <i class="fas fa-paw"></i>
+                            <span>ร้านของฉัน</span>
+                            <span class="badge badge-pill badge-warning">กำลังตรวจสอบ</span>
+                            </a>
+                        </li>
+                    }
+                    else{
+                        @if(isShop>0){
+                            var seller = _context.Seller.Where(x=>x.sellerId == user.isSeller).ToList()[0];
+                            var theHref ="/Seller2/myShop/"+seller.sellerId;
+                            var theHrefEdit ="/Seller2/editSellerProfile/"+seller.sellerId;
+                            var theHrefPackage ="/SellerPackage2/Index/"+seller.sellerId;
+                            if(seller.farmName == null){
+                                <li class="sidebar-dropdown">
+                                    <a href="/Seller2/CompleteShop">
+                                    <i class="fas fa-paw"></i>
+                                    <span>ร้านของฉัน</span>
+                                    <span class="badge badge-pill badge-warning">ร้านของฉัน!</span>
+                                    </a>
+                                </li>
+                            }//econ
+                            else{
+                                <li class="sidebar-dropdown">
+                                    <a href="#">
+                                    <i class="fas fa-paw"></i>
+                                    <span>ร้านของฉัน</span>
+                                    @* <i class="fas fa-chess-king"></i> *@
+                                    @* <i class="fas fa-gem"></i> *@
+                                    <span class="badge badge-pill badge-warning">ร้านของฉัน!</span>
+                                    </a>
+                                    <div class="sidebar-submenu">
+                                        <ul>
+                                            <li>
+                                                <a href="@theHref"> หน้าร้านของฉัน
+                                                    <span class="badge badge-pill badge-success">Pro</span>
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a href="@theHrefEdit">จัดการโปรไฟล์ร้านค้า</a>
+                                            </li>
+                                            <li>
+                                                <a href="@theHrefPackage">จัดการแพ็คเกจร้านค้า</a>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </li>
+                            }//econ
+                        }//econ
+                    }//econ
+                }
+                   @if(signInManager.IsSignedIn(User)){
+                       var user = userManager.GetUserAsync(User).Result;
+                       var role = userManager.GetRolesAsync(user).Result[0];
+                       if(role =="admin"){
+                           <li class="header-menu">
+                                <span>ผู้ดูแลระบบ</span>
+                            </li>
+                            <li>
+                                <a href="/admin">
+                                    <i class="fa fa-book"></i>
+                                    <span>จัดการระบบ</span>
+                                    <span class="badge badge-pill badge-primary"></span>
+                                </a>
+                            </li> 
+                       }//econ   
+                       else{
+                           <li class="header-menu">
+                                <span>บัญชีผู้ใช้ของฉัน</span>
+                            </li>
+                            <li>
+                                <a href="/theUser2">
+                                    <i class="fa fa-book"></i>
+                                    <span>จัดการบัญชีผู้ใช้</span>
+                                    <span class="badge badge-pill badge-primary"></span>
+                                </a>
+                            </li>
+
+                       }             
+                   }
+                   @if(signInManager.IsSignedIn(User)){
+                       var user = userManager.GetUserAsync(User).Result;
+                       if(user.isSeller < -1){
+                            <li class="header-menu">
+                                <span>ผลการลงทะเบียนเปิดร้าน</span> 
+                            </li>
+                            <li>
+                                <a href="#">
+                                    <span>ผลการลงทะเบียน</span>
+                                    <span class="badge badge-pill badge-primary">@user.memo</span>
+                                </a>
+                                
+                            </li> 
+                       }//econ
+                   }
+
+               </ul>
+           </div>
+        
+       </div>
+       <!-- sidebar-footer  -->
+       <div class="sidebar-footer">
+           @if(signInManager.IsSignedIn(User)){
+                       var user = userManager.GetUserAsync(User).Result;
+                       var role = userManager.GetRolesAsync(user).Result[0];
+                       var sellerPackageApproveCount = await _context.SellerPackage.Where(x=>x.packageStatus==0 && x.packageDetailId!=1).CountAsync();
+                       if(role =="admin"){
+                           var all = _context.Users.Select(x=>x).ToList();
+                            var totalToApprove = 0;
+                            foreach(var i in all){
+                                if(i.isSeller == -1){
+                                    totalToApprove++;
+                                }//econ
+                            }//eloop
+                            <a href="/admin/approveSeller">
+                                <i class="fa fa-bell"></i>
+                                @if(totalToApprove >0){
+                                    <span class="badge badge-pill badge-warning notification">@totalToApprove</span>
+                                }
+                            </a>
+                            <a href="/Admin/ApprovePackage">
+                                <i class="fa fa-envelope"></i>
+                                @if(sellerPackageApproveCount>0){
+                                    <span class="badge badge-pill badge-success notification">@sellerPackageApproveCount</span>
+                                }
+                            </a>
+                            <a href="/admin">
+                                <i class="fa fa-cog"></i>
+                            </a>
+                       }//ef 
+           }                          
+           <a href="/security/logOut">
+               <i class="fa fa-power-off"></i>
+           </a>
+       </div>
+   </nav>

@@ -1,0 +1,117 @@
+
+<div id='app1' v-cloak>
+
+    <v-app>
+        <v-main>
+            
+             <v-btn
+              class="white--text"
+              color="green darken-1"
+              @@click='add_theuser'
+             >
+                 <v-icon>
+                   mdi-plus
+                 </v-icon>
+                 
+             </v-btn>
+			<v-text-field
+                    v-model="search"
+                    append-icon="mdi-magnify"
+                    label="Search"
+                    single-line
+                    hide-details
+                ></v-text-field>
+             <v-data-table
+			 :search = 'search'
+             :headers ='headers'
+             :items   ='theUsers'
+             :footer-props="{ 'items-per-page-options': [25, 50,100] }"
+             :items-per-page="25"
+              class='elevation-1'
+             />
+                  <template v-slot:item.actions='{item}'>
+                        <v-btn small class="white--text mr-1"color="blue darken-1"
+                        @@click="edit_theuser(item)"
+                        >
+                            <v-icon>mdi-pencil</v-icon>
+                        </v-btn>
+                        <v-btn small class="white--text"color="red darken-1"
+                        @@click="remove_theuser(item)"
+                        >
+                            <v-icon>mdi-trash-can</v-icon>
+                        </v-btn>
+                  </template>
+             </v-data-table>
+        </v-main>
+    </v-app>
+</div>
+@section scripts{
+    <script>
+        var app;
+            var component = {
+                vuetify: new Vuetify(theme())
+                ,
+                el:'#app1'
+                ,
+                data:{
+                   search :'',
+                   theUsers:[]
+                   ,
+                   headers:[
+                      {text:'user',value:'userId',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'ชื่อจริง',value:'firstName',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'นามสกุล',value:'lastName',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เบอร์',value:'phoneNumber',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'อีเมล',value:'email',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เวลาที่สมัครเป็นผู้ใช้งาน',value:'userRegistrationDateTime',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'otp',value:'otp',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'เป็นผู้ขายหรือยัง',value:'isSeller',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'รหัสผ่าน',value:'password',align:'left',sortable:true,class: 'white--text blue darken-2'},
+                      {text:'actions',value:'actions',align:'left',sortable:true,class: 'white--text blue darken-2'}
+
+					]
+                }//edata
+                ,
+                created(){
+                  this.theUsers = @Html.Raw(Json.Serialize(@ViewBag.theUsers));
+                }//ecreated
+                ,
+                methods:{
+                    add_theuser(){
+                        window.location= '/theuser/add';
+                  
+                        
+                    }//ef
+                    ,
+                    edit_theuser(item){
+                        window.location = '/theuser/edit/'+item.userId;
+                    }
+                    ,
+                    remove_theuser(item){
+                          if (confirm("To proceed, please click OK")) {
+                              var id = item.theUserId;
+                              $.post( "/theuser/delete/"+item.theUserId)
+                              .done((res)=> {
+                                  if(res.error == -1){
+                                      this.theUsers = this.theUsers.filter(x=>x.theUserId != item.theUserId);
+                                  }//endif
+
+                              })
+                              .fail(function(res) {
+                                  alert( res.msg);
+                              });
+                          } //end if 
+                    }//ef
+
+                }//emethods
+                ,
+                computed:{
+
+                }//ecomputed
+            };
+            app = new Vue(component);
+
+
+    </script>
+
+}

@@ -1,0 +1,98 @@
+
+.top5{
+    font-size: 1.5rem;
+    position: absolute;
+    transform: rotate(340deg);
+    z-index: 1;
+    padding: 10px 20px;
+    border-radius: 150px;
+    right: 320px;
+    top: 570px;
+    color: white;
+    background-color: #FFC600;
+}
+table#suggestionTable{
+    border-style: solid;
+    border-width: 1px;
+    position: absolute;
+    right: 30px;
+    top: 620px;
+    width: 350px;
+    
+}
+#suggestionTable .mainHead{
+    text-align: center;
+    border-style: none none solid none;
+    border-color: black;
+    color: white;
+    background-color: black;
+    font-size: 1.5rem;
+}
+#imgTable{
+    margin-left: 5px;
+    border-style: solid;
+    width: 128px;
+    margin-right: 20px;
+}
+#imgTable:hover{
+    width: 150px;
+    z-index: 2;
+    position: relative;
+}
+.suggestionHeading{
+    font-size: 1.2rem;
+}
+#suggestionTable th{
+    padding: 2px;
+    height: 0;
+}
+#suggestionTable .space{
+    border-style: solid none none none;
+    border-width: 1px;
+    margin:50px
+}
+
+
+/* ========carousel part======== */
+.homeTxt{
+    color:white;
+    margin: 50px 0 0 50px;
+}
+.homeTxtHeading{
+    font-family: 'Merienda', cursive;
+    font-size: 5rem;
+}
+.homeTxtSub1{
+    margin-left: 120px;
+    font-size: 3rem;
+    font-family: 'Sriracha', cursive;
+}
+
+/* =======card part========= */
+.cardSection{
+    margin-top:100px;
+}
+.cardCol{
+    padding: 0 0 0 13px;
+}
+.cardHeading{
+    background-color: red;
+}
+.cardColTxt{
+    padding:40px 0 0 0;
+    font-size: 1.1rem;
+    font-weight: 900;
+}
+
+.cardColTxt td{
+  font-weight: 100;
+  font-size: 1.1rem;  
+}
+
+.cardImg{
+    width: 150px;
+    height: 200px;
+}
+.iconBtn{
+    margin: 0 5px;
+}

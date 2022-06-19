@@ -1,0 +1,16 @@
+@model dog7.Security.ChangePasswordModel
+<h3>Enable Account</h3>
+<form asp-action ="enableaccount">
+    <div class="form-group">
+    <label class="control-label">Staff</label>
+    <select class="form-control" asp-for="userId" asp-items="@ViewBag.Id" name="userId">
+    </select>
+
+</div>
+<hr>
+
+<div class="form-group">
+    <input type="submit"   />
+</div>
+
+</form>
